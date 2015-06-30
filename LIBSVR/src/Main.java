@@ -16,8 +16,9 @@ public class Main {
 	// no train- terminate program after creating files? false=keep doing stuff
 	// finalModel- stop grid search and start creating model against test data?
 	// allFeat- features 1, 2, and 3
-	static boolean noTrain = true, finalModel = false, feat13 = true, allFeat = false;
-	static String train="train3.txt", test="test3.txt";
+	static boolean noTrain = false, finalModel = false, feat13 = true,
+			allFeat = false;
+	static String train = "train3.txt", test = "test3.txt";
 	// features: k feature
 	static int features = 3, mers = 36;
 	private BufferedReader fp, nfp;
@@ -27,7 +28,7 @@ public class Main {
 	private String core = "";
 	// cores: "GCGC" or "GCGG" or "CCGC"
 	private static double[] params;
-	//form of -c, -p
+	// form of -c, -p
 	private static PrintWriter writer;
 	private static int counter;
 
@@ -41,82 +42,78 @@ public class Main {
 		}
 		Main m = new Main();
 		// select the subgroup of sequences to analyze and reformat
-		m.select(train);
-		m.next();
+		m.select(train, true);
+		// do the same with the test file
+		m.select(test, false);
+		
+		//next scale the feature data
+		svm_scale.main(new String[] { "converted-selected-train",
+				"converted-selected-test" });
+		// if final model
+		if (finalModel) {
+			for (counter = 0; counter < (int) params.length / 2; counter++) {
+				svm_train.main(new String[] { "-q", "-c",
+						Double.toString(params[2 * counter]), "-p",
+						Double.toString(params[2 * counter + 1]), "-s", "3",
+						"-t", "0", "scaled-converted-selected-train" });
+				svm_predict
+						.main(new String[] { "scaled-converted-selected-test",
+								"scaled-converted-selected-train.model",
+								"output.txt" });
+			}
+			// done
+			writer.close();
+		}
 	}
-	
-	public Main() throws FileNotFoundException, UnsupportedEncodingException{
-		params = new double[]{
-				0.06,	0.12
+
+	public Main() throws FileNotFoundException, UnsupportedEncodingException {
+		params = new double[] { 0.06, 0.12
 
 		};
-		if(finalModel){
+		if (finalModel) {
 			writer = new PrintWriter("models", "UTF-8");
-			//print c
+			// print c
 			writer.print("c ");
 			// print p
 			writer.print("p ");
-			//print value
+			// print value
 			writer.print("value");
 			writer.println();
 		}
 	}
 
-	private void next() throws IOException {
-		// do the same with the test file
-		select(test);
-		svm_scale.main(new String[] { "converted-selected-"+train,
-				"converted-selected-test" });
-		// final model
-		if (finalModel) {
-			for(counter = 0; counter < (int)params.length/2; counter++){
-			svm_train
-					.main(new String[] { "-q", "-c", Double.toString(params[2*counter]), "-p", Double.toString(params[2*counter+1]),
-							"-s", "3", "-t", "0",
-							"scaled-converted-selected-train" });
-			svm_predict
-					.main(new String[] { "scaled-converted-selected-test",
-							"scaled-converted-selected-train.model",
-							"output.txt" });
-			}
-			//done
-			writer.close();
-		}
-	}
-	
-	public static void add(String s1, String s2){
-		//add this score to models from the prediction with the test set
-		//print c
-		writer.print(params[2*counter] + " ");
+	public static void add(String s1, String s2) {
+		// add this score to models from the prediction with the test set
+		// print c
+		writer.print(params[2 * counter] + " ");
 		// print p
-		writer.print(params[2*counter+1] + " ");
-		//print score
+		writer.print(params[2 * counter + 1] + " ");
+		// print score
 		writer.print(s1);
 		writer.println();
 		writer.print(s2);
 		writer.println();
 	}
 
-	private void select(String arg) throws IOException {
+	private void select(String arg, boolean training) throws IOException {
 		// make a selection of sequences to train/test
 		PrintWriter writer;
-		writer = new PrintWriter("selected-" + arg, "UTF-8");
+		if (training) {
+			writer = new PrintWriter("selected-train", "UTF-8");
+		} else {
+			writer = new PrintWriter("selected-test", "UTF-8");
+		}
 		fp = new BufferedReader(new FileReader(arg));
 		// calculate the number of seqs and lines in data
-		size = 0;
-		while (fp.readLine() != null) {
-			size++;
-		}
+		size = (int) (fp.lines().count());
+		fp.close();
 		fp = new BufferedReader(new FileReader(arg));
 
 		if (core.equals("")) {
 			// no specified core
 			String line = fp.readLine();
 			while (line != null) {
-				st = new StringTokenizer(line);
-				writer.print(st.nextToken() + " ");
-				writer.print(st.nextToken());
-				writer.println();
+				writer.println(line);
 				line = fp.readLine();
 			}
 		} else {
@@ -147,8 +144,13 @@ public class Main {
 			}
 		}
 		fp.close();
+		nfp.close();
 		writer.close();
-		run("selected-" + arg);
+		if (training) {
+			run("selected-train");
+		} else {
+			run("selected-test");
+		}
 	}
 
 	private void run(String arg) throws IOException {
@@ -166,7 +168,7 @@ public class Main {
 			// look at each position in the sequence
 			String seq = st.nextToken();
 			boolean repeat = false;
-			if (allFeat||feat13) {
+			if (allFeat || feat13) {
 				features = 1;
 				repeat = true;
 			}
@@ -180,7 +182,7 @@ public class Main {
 					} else if (features == 3) {
 						valueShift = 4 * mers + 16 * (mers - 1);
 					}
-				} else if(feat13){
+				} else if (feat13) {
 					if (features == 2) {
 						features = 3;
 						valueShift = 4 * mers;
@@ -197,7 +199,7 @@ public class Main {
 											features) + i
 									* Math.pow(4, features)) + ": 1");
 				}
-				if (allFeat||feat13) {
+				if (allFeat || feat13) {
 					if (features == 3) {
 						repeat = false;
 					} else {
