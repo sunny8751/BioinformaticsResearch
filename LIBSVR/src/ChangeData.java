@@ -15,7 +15,7 @@ public class ChangeData {
 	void run(String num) throws IOException {
 		Random random = new Random();
 		BufferedReader allData = new BufferedReader(new FileReader("allData.txt"));
-		int size = (int) (allData.lines().count());
+		int size = Main.countLines(allData);
 		allData.close();
 		allData = new BufferedReader(new FileReader("allData.txt"));
 		

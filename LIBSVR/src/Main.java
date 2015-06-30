@@ -41,14 +41,20 @@ public class Main {
 			finalModel = false;
 		}
 		Main m = new Main();
-		// select the subgroup of sequences to analyze and reformat
-		m.select(train, true);
-		// do the same with the test file
-		m.select(test, false);
-		
-		//next scale the feature data
-		svm_scale.main(new String[] { "converted-selected-train",
-				"converted-selected-test" });
+		//in order to do all of them at once
+		for (int i = 3; i <= 10; i++) {
+			System.out.println("ITERATION " + (i - 2));
+			train = "train" + i;
+			test = "test" + i;
+			// select the subgroup of sequences to analyze and reformat
+			m.select(train, true);
+			// do the same with the test file
+			m.select(test, false);
+
+			// next scale the feature data
+			svm_scale.main(new String[] { "converted-selected-train",
+					"converted-selected-test" });
+		}
 		// if final model
 		if (finalModel) {
 			for (counter = 0; counter < (int) params.length / 2; counter++) {
@@ -105,7 +111,7 @@ public class Main {
 		}
 		fp = new BufferedReader(new FileReader(arg));
 		// calculate the number of seqs and lines in data
-		size = (int) (fp.lines().count());
+		size = countLines(fp);
 		fp.close();
 		fp = new BufferedReader(new FileReader(arg));
 
@@ -321,5 +327,15 @@ public class Main {
 			}
 		}
 		return value;
+	}
+	
+	public static int countLines(BufferedReader bf) throws IOException{
+		String l = bf.readLine();
+		int counter = 0;
+		while(l!=null){
+			counter ++;
+			l = bf.readLine();
+		}
+		return counter;
 	}
 }
