@@ -1,4 +1,5 @@
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -9,10 +10,16 @@ import java.util.StringTokenizer;
 public class coreFrequency {
 
 	public static void main(String[] args) throws IOException {
+		for(int i = 0; i<10; i++){
+			System.out.println("train"+(i+1));
+			run("train"+(i+1));
+		}
+	}
+	private static void run(String file) throws IOException{
 		List <String> cores = new ArrayList<String>();
 		List <Integer> coreFreq = new ArrayList<Integer>();
 		
-		BufferedReader fp = new BufferedReader(new FileReader("test.txt"));
+		BufferedReader fp = new BufferedReader(new FileReader(file+".txt"));
 		String line = fp.readLine();
 		while(line!=null){
 			StringTokenizer st = new StringTokenizer (line);

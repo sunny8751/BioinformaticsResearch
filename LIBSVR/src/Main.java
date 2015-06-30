@@ -16,8 +16,8 @@ public class Main {
 	// no train- terminate program after creating files? false=keep doing stuff
 	// finalModel- stop grid search and start creating model against test data?
 	// allFeat- features 1, 2, and 3
-	static boolean noTrain = false, finalModel = false, allFeat = false;
-	static String train="normTrain.txt", test="normTest.txt";
+	static boolean noTrain = true, finalModel = false, feat13 = true, allFeat = false;
+	static String train="train3.txt", test="test3.txt";
 	// features: k feature
 	static int features = 3, mers = 36;
 	private BufferedReader fp, nfp;
@@ -66,17 +66,17 @@ public class Main {
 		// do the same with the test file
 		select(test);
 		svm_scale.main(new String[] { "converted-selected-"+train,
-				"converted-selected-"+test });
+				"converted-selected-test" });
 		// final model
 		if (finalModel) {
 			for(counter = 0; counter < (int)params.length/2; counter++){
 			svm_train
 					.main(new String[] { "-q", "-c", Double.toString(params[2*counter]), "-p", Double.toString(params[2*counter+1]),
 							"-s", "3", "-t", "0",
-							"scaled-converted-selected-" + train });
+							"scaled-converted-selected-train" });
 			svm_predict
-					.main(new String[] { "scaled-converted-selected-"+test,
-							"scaled-converted-selected-"+train+".model",
+					.main(new String[] { "scaled-converted-selected-test",
+							"scaled-converted-selected-train.model",
 							"output.txt" });
 			}
 			//done
@@ -166,7 +166,7 @@ public class Main {
 			// look at each position in the sequence
 			String seq = st.nextToken();
 			boolean repeat = false;
-			if (allFeat) {
+			if (allFeat||feat13) {
 				features = 1;
 				repeat = true;
 			}
@@ -180,6 +180,11 @@ public class Main {
 					} else if (features == 3) {
 						valueShift = 4 * mers + 16 * (mers - 1);
 					}
+				} else if(feat13){
+					if (features == 2) {
+						features = 3;
+						valueShift = 4 * mers;
+					}
 				}
 				for (int i = 0; i < seq.length() + 1 - features; i++) {
 					// each position of sequence
@@ -192,7 +197,7 @@ public class Main {
 											features) + i
 									* Math.pow(4, features)) + ": 1");
 				}
-				if (allFeat) {
+				if (allFeat||feat13) {
 					if (features == 3) {
 						repeat = false;
 					} else {
