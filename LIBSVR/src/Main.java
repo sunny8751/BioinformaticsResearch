@@ -105,7 +105,7 @@ public class Main {
 		}
 		fp = new BufferedReader(new FileReader(arg));
 		// calculate the number of seqs and lines in data
-		size = (int) (fp.lines().count());
+		size = countLines(fp);
 		fp.close();
 		fp = new BufferedReader(new FileReader(arg));
 
@@ -321,5 +321,15 @@ public class Main {
 			}
 		}
 		return value;
+	}
+	
+	public static int countLines(BufferedReader bf) throws IOException{
+		String l = bf.readLine();
+		int counter = 0;
+		while(l!=null){
+			counter ++;
+			l = bf.readLine();
+		}
+		return counter;
 	}
 }
