@@ -31,19 +31,22 @@ public class Main {
 	// form of -c, -p
 	private static PrintWriter writer;
 	private static int counter;
+	
+	public static int iteration;
 
 	// converts file to supported format
 	public static void main(String[] args) throws IOException {
-		if (!finalModel) {
-			GridSearch.Start();
-		}
-		if (noTrain) {
-			finalModel = false;
-		}
 		Main m = new Main();
 		//in order to do all of them at once
 		for (int i = 3; i <= 10; i++) {
 			System.out.println("ITERATION " + (i - 2));
+			iteration = i;
+			if (!finalModel) {
+				GridSearch.Start();
+			}
+			if (noTrain) {
+				finalModel = false;
+			}
 			train = "train" + i;
 			test = "test" + i;
 			// select the subgroup of sequences to analyze and reformat
@@ -109,11 +112,11 @@ public class Main {
 		} else {
 			writer = new PrintWriter("selected-test", "UTF-8");
 		}
-		fp = new BufferedReader(new FileReader(arg));
+		fp = new BufferedReader(new FileReader(arg+".txt"));
 		// calculate the number of seqs and lines in data
 		size = countLines(fp);
 		fp.close();
-		fp = new BufferedReader(new FileReader(arg));
+		fp = new BufferedReader(new FileReader(arg+".txt"));
 
 		if (core.equals("")) {
 			// no specified core
@@ -148,9 +151,9 @@ public class Main {
 					nfp.readLine();
 				}
 			}
+			nfp.close();
 		}
 		fp.close();
-		nfp.close();
 		writer.close();
 		if (training) {
 			run("selected-train");

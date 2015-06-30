@@ -7,7 +7,7 @@ public class GridSearch {
 
 	// P, C... Iterate through P first, then C
 
-	private static int counterP = 4, counterC = 4;
+	private static int counterP = 0, counterC = 0;
 	private static boolean course = true;
 	private static double[][] values;
 	private static long startTime;
@@ -42,7 +42,7 @@ public class GridSearch {
 	public static void Start() throws FileNotFoundException,
 			UnsupportedEncodingException {
 		values = new double[maxNumP][maxNumC];
-		writer = new PrintWriter("courseErrors", "UTF-8");
+		writer = new PrintWriter("courseErrors"+Main.iteration, "UTF-8");
 		writer.print(" ");
 		for (int i = 0; i < maxNumP; i++) {
 			writer.print(getP(i) + " ");
@@ -81,7 +81,7 @@ public class GridSearch {
 			System.out.println("Estimated Wait: "
 					+ ((int) ((secs - secs % 60) / 60)) + ":" + secs % 60);
 		}
-		System.out.println(getP(counterP) + ", " + getC(counterC));
+		System.out.println(counterP + ", " + counterC);
 		System.out.println(value);
 		writer.print(value + " ");
 		if (course) {
@@ -173,6 +173,9 @@ public class GridSearch {
 			writer.close();
 			// if course, do fine now
 			if (course) {
+				counterP = 0;
+				counterC = 0;
+				System.out.println("Done with iteration.");
 				return;
 			} else {
 				return;
@@ -196,6 +199,6 @@ public class GridSearch {
 		svm_train.main(new String[] { "-q", "-c",
 				Double.toString(getC(counterC)), "-p",
 				Double.toString(getP(counterP)), "-s", "3", "-t", "0", "-v",
-				"5", "scaled-converted-selected-" + Main.train });
+				"5", "scaled-converted-selected-train" });
 	}
 }
