@@ -15,7 +15,7 @@ public class GridSearch {
 	private static PrintWriter writer;
 	private static boolean started = false;
 
-	private static int maxNumC = 8;
+	private static int maxNumC;
 	// y-intercept and slope?
 	private static double yC, mC;
 
@@ -28,7 +28,7 @@ public class GridSearch {
 		}
 	}
 
-	private static int maxNumP = 8;
+	private static int maxNumP;
 	// y-intercept and slope?
 	private static double yP, mP;
 
@@ -43,6 +43,8 @@ public class GridSearch {
 
 	public static void Start() throws FileNotFoundException,
 			UnsupportedEncodingException {
+		maxNumC = 8;
+		maxNumP = 8;
 		values = new double[maxNumP][maxNumC];
 		writer = new PrintWriter("courseErrors" + Main.iteration, "UTF-8");
 		writer.print(" ");
@@ -58,8 +60,6 @@ public class GridSearch {
 		//
 		// course grid search
 		course = true;
-		maxNumC = 8;
-		maxNumP = 8;
 		train();
 	}
 
@@ -89,9 +89,7 @@ public class GridSearch {
 		}
 		System.out.println(value);
 		writer.print(value + " ");
-		if (course) {
-			values[counterP][counterC] = value;
-		}
+		values[counterP][counterC] = value;
 	}
 
 	private static void fine() throws IOException {
@@ -100,20 +98,7 @@ public class GridSearch {
 		//
 		// get min and max values of p and c of top 3 R^2 values
 		int[] pValues = new int[3], cValues = new int[3];
-		double[] ascendingValues = new double[maxNumP * maxNumC];
-		for (int c = 0; c < maxNumC; c++) {
-			for (int p = 0; p < maxNumP; p++) {
-				ascendingValues[p + c * maxNumP] = values[p][c];
-			}
-		}
-		// sort in ascending order
-		Arrays.sort(ascendingValues);
-		// get last three, aka biggest three values
-		// it is still in increasing order
-		double[] top3 = new double[] {
-				ascendingValues[ascendingValues.length - 3],
-				ascendingValues[ascendingValues.length - 2],
-				ascendingValues[ascendingValues.length - 1] };
+		double[] top3 = topValues(3);
 		// allocate to pValues and cValues
 		for (int i = 0; i < 3; i++) {
 			// find the value in ascendingValues
@@ -123,24 +108,68 @@ public class GridSearch {
 		}
 		Arrays.sort(pValues);
 		Arrays.sort(cValues);
-		yP = getP(pValues[0]);
-		yC = getC(cValues[0]);
-		mP = (getP(pValues[2]) - getP(pValues[0])) / 6f;
-		mC = (getC(cValues[2]) - getC(cValues[0])) / 6f;
+		// set the getP() and getC() variables now
+		if (top3[2] >= top3[1] + .02D) {
+			System.out.println("Method 1");
+			// if top value is way above the other 2
+			// just consider the top value
+			int middleP = findIndices(top3[2], values)[0];
+			int middleC = findIndices(top3[2], values)[1];
+			mP = getP(middleP) * .2f;
+			mC = getC(middleC) * .2f;
+			yP = getP(middleP) - mP * 3;
+			yC = getC(middleC) - mC * 3;
+			course = false;
+		} else if (pValues[2] == maxNumP - 1 || cValues[2] == maxNumC - 1
+				|| pValues[2] == 0 || cValues[2] == 0) {
+			System.out.println("Method 2");
+			// if the highest value is on the edge of course grid search
+			int middleP = findIndices(top3[2], values)[0];
+			int middleC = findIndices(top3[2], values)[1];
+			mP = getP(middleP) * .2f;
+			mC = getC(middleC) * .2f;
+			yP = getP(middleP) - mP * 3;
+			yC = getC(middleC) - mC * 3;
+		} else {
+			System.out.println("Method 3");
+			yP = getP(pValues[0]);
+			yC = getC(cValues[0]);
+			mP = (getP(pValues[2]) - getP(pValues[0])) / 6f;
+			mC = (getC(cValues[2]) - getC(cValues[0])) / 6f;
+		}
+		System.out.println("yP" + yP + ", mP" + mP + ", yC" + yC + ", mC" + mC);
+		System.out.println("TOP: "+top3[2]);
 		maxNumC = 7;
 		maxNumP = 7;
 		course = false;
+		values = new double[maxNumP][maxNumC];
 		// setup the writer
-		writer = new PrintWriter("fineErrors", "UTF-8");
+		writer = new PrintWriter("fineErrors" + Main.iteration, "UTF-8");
 		writer.print(" ");
 		for (int i = 0; i < maxNumP; i++) {
 			writer.print(getP(i) + " ");
 		}
 		writer.println();
 		writer.print(getC(0) + " ");
-		System.out.println("keep going!");
 		train();
-		System.out.println("keep going!");
+	}
+
+	static double[] topValues(int length) {
+		double[] ascendingValues = new double[maxNumP * maxNumC];
+		for (int c = 0; c < maxNumC; c++) {
+			for (int p = 0; p < maxNumP; p++) {
+				ascendingValues[p + c * maxNumP] = values[p][c];
+			}
+		}
+		// sort in ascending order
+		Arrays.sort(ascendingValues);
+		// get last elements, aka biggest values
+		// it is still in increasing order
+		double[] top = new double[length];
+		for (int i = 0; i < length; i++) {
+			top[i] = ascendingValues[ascendingValues.length - length + i];
+		}
+		return top;
 	}
 
 	// this is for the fine() method
@@ -171,23 +200,27 @@ public class GridSearch {
 			writer.close();
 			// if course, do fine now
 			if (course) {
-				//counterP = 0;
-				//counterC = 0;
+				// counterP = 0;
+				// counterC = 0;
 				started = false;
 				System.out.println("STARTING FINE SEARCH.............");
 				/*
 				 * dont need to set counter to 0... already done in fine()
-				fine();
-				*/
+				 * fine();
+				 */
 				fine();
 				return;
 			} else {
-				//try top 5 and find best model
-				counterP = 0; 
+				// try top 5 and find best model
+				counterP = 0;
 				counterC = 0;
 				started = false;
-				//return to main and do next iteration
+				// return to main and do next iteration
 				System.out.println("DONE WITH ITERATION.............");
+				// highest score
+				double top = topValues(1)[0];
+				System.out.println(top + " at " + findIndices(top, values)[0]
+						+ ", " + findIndices(top, values)[1]);
 				return;
 			}
 		}
@@ -207,15 +240,14 @@ public class GridSearch {
 			startTime = System.currentTimeMillis();
 		}
 		/*
-		 * when you do scale
+		 * when you do scale svm_train.main(new String[] { "-q", "-c",
+		 * Double.toString(getC(counterC)), "-p",
+		 * Double.toString(getP(counterP)), "-s", "3", "-t", "0", "-v", "5",
+		 * "scaled-converted-selected-train" });
+		 */
 		svm_train.main(new String[] { "-q", "-c",
 				Double.toString(getC(counterC)), "-p",
 				Double.toString(getP(counterP)), "-s", "3", "-t", "0", "-v",
-				"5", "scaled-converted-selected-train" });
-				*/
-		svm_train.main(new String[] { "-q", "-c",
-						Double.toString(getC(counterC)), "-p",
-						Double.toString(getP(counterP)), "-s", "3", "-t", "0", "-v",
-						"5", "converted-selected-train" });
+				"5", "converted-selected-train" });
 	}
 }
