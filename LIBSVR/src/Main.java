@@ -31,14 +31,14 @@ public class Main {
 	// form of -c, -p
 	private static PrintWriter writer;
 	private static int counter;
-	
+
 	public static int iteration;
 
 	// converts file to supported format
 	public static void main(String[] args) throws IOException {
 		Main m = new Main();
-		//in order to do all of them at once
-		for (int i = 3; i <= 10; i++) {
+		// in order to do all of them at once
+		for (int i = 9; i <= 10; i++) {
 			System.out.println("ITERATION " + (i - 2));
 			iteration = i;
 			if (!finalModel) {
@@ -47,16 +47,20 @@ public class Main {
 			if (noTrain) {
 				finalModel = false;
 			}
-			train = "train" + i;
-			test = "test" + i;
+			train = "train" + i + ".txt";
+			test = "test" + i + ".txt";
 			// select the subgroup of sequences to analyze and reformat
 			m.select(train, true);
 			// do the same with the test file
 			m.select(test, false);
-
-			// next scale the feature data
-			svm_scale.main(new String[] { "converted-selected-train",
-					"converted-selected-test" });
+			/*
+			 * // next scale the feature data svm_scale.main(new String[] {
+			 * "converted-selected-train", "converted-selected-test" });
+			 */
+			// start training
+			if (!Main.finalModel && !Main.noTrain) {
+				GridSearch.go();
+			}
 		}
 		// if final model
 		if (finalModel) {
@@ -112,11 +116,11 @@ public class Main {
 		} else {
 			writer = new PrintWriter("selected-test", "UTF-8");
 		}
-		fp = new BufferedReader(new FileReader(arg+".txt"));
+		fp = new BufferedReader(new FileReader(arg));
 		// calculate the number of seqs and lines in data
 		size = countLines(fp);
 		fp.close();
-		fp = new BufferedReader(new FileReader(arg+".txt"));
+		fp = new BufferedReader(new FileReader(arg));
 
 		if (core.equals("")) {
 			// no specified core
@@ -331,12 +335,12 @@ public class Main {
 		}
 		return value;
 	}
-	
-	public static int countLines(BufferedReader bf) throws IOException{
+
+	public static int countLines(BufferedReader bf) throws IOException {
 		String l = bf.readLine();
 		int counter = 0;
-		while(l!=null){
-			counter ++;
+		while (l != null) {
+			counter++;
 			l = bf.readLine();
 		}
 		return counter;
