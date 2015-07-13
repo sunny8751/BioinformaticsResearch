@@ -38,7 +38,7 @@ public class Main {
 	public static void main(String[] args) throws IOException {
 		Main m = new Main();
 		// in order to do all of them at once
-		for (int i = 9; i <= 10; i++) {
+		for (int i = 2; i <= 2; i++) {
 			System.out.println("ITERATION " + (i - 2));
 			iteration = i;
 			if (!finalModel) {

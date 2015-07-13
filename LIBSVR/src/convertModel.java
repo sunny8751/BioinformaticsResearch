@@ -16,7 +16,7 @@ public class convertModel {
 		// R = SV*D
 
 		BufferedReader fp = new BufferedReader(new FileReader(
-				"scaled-converted-selected-train.txt.model"));
+				"13FeatNoCore(Data3).model"));
 
 		// get # of SVs
 		fp.readLine();
@@ -56,10 +56,10 @@ public class convertModel {
 				// feature
 				if (i == currentFeature - 1) {
 					d[lineNumber][i] = 1;
-					if(st.hasMoreTokens()){
-					token = st.nextToken();
-					currentFeature = Integer.parseInt(token.substring(0,
-							token.indexOf(":")));
+					if (st.hasMoreTokens()) {
+						token = st.nextToken();
+						currentFeature = Integer.parseInt(token.substring(0,
+								token.indexOf(":")));
 					}
 				} else {
 					// replace with a 0
@@ -73,6 +73,10 @@ public class convertModel {
 		double[] r = new double[P];
 		PrintWriter writer = new PrintWriter("r", "UTF-8");
 		for (int i = 0; i < P; i++) {
+			// ignore the features that have the core
+			if (ignoreFeat(i)) {
+				continue;
+			}
 			double sum = 0;
 			for (int j = 0; j < N; j++) {
 				sum += sv[i] * d[j][i];
@@ -83,6 +87,55 @@ public class convertModel {
 		}
 		writer.close();
 		fp.close();
+	}
+
+	boolean ignoreFeat(int index) {
+		index++;
+		int feature = Main.features;
+		int minPos = 17;
+		int maxPos = 20;
+		// minPos-1 to account for all ranges
+		minPos--;
+		if (Main.allFeat) {
+			// test 1mer feat
+			if (index >= 4 * minPos && index < 4 * maxPos) {
+				return true;
+			}
+			index -= 4 * Main.mers;
+			// test 2mer feat
+			if (index >= 16 * minPos && index < 16 * maxPos) {
+				return true;
+			}
+			index -= 16 * Main.mers;
+			// test 3mer feat
+			if (index >= 64 * minPos && index < 64 * maxPos) {
+				return true;
+			}
+		} else if (Main.feat13) {
+			// test 1mer feat
+			if (index >= 4 * minPos && index < 4 * maxPos) {
+				return true;
+			}
+			index -= 4 * Main.mers;
+			// test 3mer feat
+			if (index >= 64 * minPos && index < 64 * maxPos) {
+				return true;
+			}
+		} else if (feature == 1) {
+			if (index >= 4 * minPos && index < 4 * maxPos) {
+				return true;
+			}
+		} else if (feature == 2) {
+			if (index >= 16 * minPos && index < 16 * maxPos) {
+				return true;
+			}
+		} else if (feature == 3) {
+			if (index >= 64 * minPos && index < 64 * maxPos) {
+				return true;
+			}
+		}
+		// not any of these
+		return false;
 	}
 
 	void run() throws IOException {

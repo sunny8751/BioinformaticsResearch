@@ -11,21 +11,37 @@ public class analyzeModel {
 					1191,
 					1190
 			};
+		int feature = Main.features;
 		for (int a = 0; a < features.length; a++) {
+			//featureValues start from 1, 2, ... P
 			int featureValue = features[a];
+			//compensate for combination of features
+			if(Main.allFeat){
+				if(featureValue<=4*Main.mers){
+					feature = 1;
+				} else if(featureValue<=16*Main.mers+4*Main.mers){
+					feature = 2;
+					featureValue -= 4*Main.mers;
+				}else{
+					feature = 3;
+					featureValue -= 4*Main.mers + 16*Main.mers;
+				}
+			}else if(Main.feat13){
+				
+			}
 			//position starting from 1, 2, ... N
 			int position = (int) Math.ceil(featureValue
-					/ Math.pow(4, Main.features));
-			featureValue -= (position - 1) * Math.pow(4, Main.features);
-			System.out.println(test(featureValue) + " at " + position);
+					/ Math.pow(4, feature));
+			featureValue -= (position - 1) * Math.pow(4, feature);
+			System.out.println(test(featureValue, feature) + " at " + position);
 		}
 	}
 
-	private static String test(int value) {
+	private static String test(int value, int feature) {
 		// returns the single/pair/triplet value of the input seq at that
 		// position
 		String seq = "";
-		if (Main.features == 1) {
+		if (feature == 1) {
 			switch (value) {
 			case 1:
 				seq = "A";
@@ -42,7 +58,7 @@ public class analyzeModel {
 			default:
 				seq = "NO";
 			}
-		} else if (Main.features == 2) {
+		} else if (feature == 2) {
 			switch (value) {
 			case 1:
 				seq = "AA";
@@ -95,7 +111,7 @@ public class analyzeModel {
 			default:
 				seq = "NO";
 			}
-		} else if (Main.features == 3) {
+		} else if (feature == 3) {
 			// first nucleotide
 			if (value <= 16) {
 				seq = "A";

@@ -9,10 +9,9 @@ import java.util.StringTokenizer;
 public class coreFrequency {
 
 	public static void main(String[] args) throws IOException {
-		for(int i = 0; i<10; i++){
-			System.out.println("train"+(i+1));
+int i = 1;
+		System.out.println("train"+(i+1));
 			run("train"+(i+1));
-		}
 	}
 	private static void run(String file) throws IOException{
 		List <String> cores = new ArrayList<String>();
