@@ -20,7 +20,7 @@ public class Main {
 			allFeat = false;
 	static String train = "", test = "";
 	// features: k feature
-	static int features = 3, mers = 36;
+	static int features = 1, mers = 34;
 	private BufferedReader fp, nfp;
 	private StringTokenizer st;
 	// size: number of lines in the file
@@ -38,17 +38,17 @@ public class Main {
 	public static void main(String[] args) throws IOException {
 		Main m = new Main();
 		// in order to do all of them at once
-		for (int i = 1; i <= 1; i++) {
+		for (int i = 1; i <= 10; i++) {
 			System.out.println("ITERATION DATA " + i);
 			iteration = i;
 			if (!finalModel) {
 				GridSearch.Start();
-			} 
+			}
 			if (noTrain) {
 				finalModel = false;
 			}
-			train = "train" + i + ".txt";
-			test = "test" + i + ".txt";
+			train = "_train" + i + ".txt";
+			test = "_test" + i + ".txt";
 			// select the subgroup of sequences to analyze and reformat
 			m.select(train, true);
 			// do the same with the test file
@@ -146,11 +146,18 @@ public class Main {
 				String seq = st.nextToken();
 				if (seq.indexOf(core) == mers / 2 - 2) {
 					// select this
-					st = new StringTokenizer(nfp.readLine());
-					writer.print(st.nextToken() + " ");
-					writer.print(st.nextToken());
-					writer.println();
-					size++;
+					if ((core.equals("GCGC")
+							&& !seq.substring(mers / 2 - 4, mers / 2 - 4 + 2)
+									.equals("GC") && !seq.substring(
+							mers / 2 + 2, mers / 2 + 2 + 2).equals("GC"))) {
+						st = new StringTokenizer(nfp.readLine());
+						writer.print(st.nextToken() + " ");
+						writer.print(st.nextToken());
+						writer.println();
+						size++;
+					} else {
+						nfp.readLine();
+					}
 				} else {
 					nfp.readLine();
 				}
@@ -191,14 +198,14 @@ public class Main {
 				int valueShift = 0;
 				if (allFeat) {
 					if (features == 2) {
-						valueShift = 4 * mers;
+						valueShift = 4 * (mers - 4);
 					} else if (features == 3) {
-						valueShift = 4 * mers + 16 * (mers - 1);
+						valueShift = 4 * (mers - 4) + 16 * (mers - 1 - 3);
 					}
 				} else if (feat13) {
 					if (features == 2) {
 						features = 3;
-						valueShift = 4 * mers;
+						valueShift = 4 * (mers - 4);
 					}
 				}
 				for (int i = 0; i < seq.length() + 1 - features; i++) {
@@ -206,11 +213,14 @@ public class Main {
 					// find the value for each position with respect to the
 					// feature number
 					// print the feature value and its corresponding value
-					writer.print(" "
-							+ (int) (valueShift
-									+ test(seq.substring(i, i + features),
-											features) + i
-									* Math.pow(4, features)) + ": 1");
+					// only include features that aren't only core
+					if (i < mers / 2 - 2 || i >= mers / 2 + 2 + (1 - features)) {
+						writer.print(" "
+								+ (int) (valueShift
+										+ test(seq.substring(i, i + features),
+												features) + i
+										* Math.pow(4, features)) + ": 1");
+					}
 				}
 				if (allFeat || feat13) {
 					if (features == 3) {
