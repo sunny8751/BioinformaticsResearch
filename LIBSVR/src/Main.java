@@ -18,14 +18,14 @@ public class Main {
 	// allFeat- features 1, 2, and 3
 	static boolean noTrain = false, finalModel = false, feat13 = true,
 			allFeat = false;
-	static String train = "train3.txt", test = "test3.txt";
+	static String train = "", test = "";
 	// features: k feature
 	static int features = 3, mers = 36;
 	private BufferedReader fp, nfp;
 	private StringTokenizer st;
 	// size: number of lines in the file
 	private int size;
-	private String core = "";
+	private String core = "GCGC";
 	// cores: "GCGC" or "GCGG" or "CCGC"
 	private static double[] params;
 	// form of -c, -p
@@ -38,8 +38,8 @@ public class Main {
 	public static void main(String[] args) throws IOException {
 		Main m = new Main();
 		// in order to do all of them at once
-		for (int i = 2; i <= 2; i++) {
-			System.out.println("ITERATION " + (i - 2));
+		for (int i = 1; i <= 1; i++) {
+			System.out.println("ITERATION DATA " + i);
 			iteration = i;
 			if (!finalModel) {
 				GridSearch.Start();

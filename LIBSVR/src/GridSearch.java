@@ -200,15 +200,14 @@ public class GridSearch {
 			writer.close();
 			// if course, do fine now
 			if (course) {
-				// counterP = 0;
-				// counterC = 0;
+				counterP = 0;
+				counterC = 0;
 				started = false;
-				System.out.println("STARTING FINE SEARCH.............");
+				//System.out.println("STARTING FINE SEARCH.............");
 				/*
 				 * dont need to set counter to 0... already done in fine()
 				 * fine();
 				 */
-				fine();
 				return;
 			} else {
 				// try top 5 and find best model

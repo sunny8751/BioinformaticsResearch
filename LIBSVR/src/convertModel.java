@@ -8,15 +8,17 @@ public class convertModel {
 
 	public static void main(String[] args) throws IOException {
 		// new convertModel().run();
-		new convertModel().convert();
+		convertModel cm = new convertModel();
+		for (int i = 2; i <= 10; i++) {
+			cm.convert("13FeatNoCore(Data" + i + ")");
+		}
 	}
 
-	void convert() throws IOException {
+	void convert(String file) throws IOException {
 		// get the feat. contribution weight matrix (1xP)
 		// R = SV*D
 
-		BufferedReader fp = new BufferedReader(new FileReader(
-				"13FeatNoCore(Data3).model"));
+		BufferedReader fp = new BufferedReader(new FileReader(file + ".model"));
 
 		// get # of SVs
 		fp.readLine();
@@ -34,6 +36,8 @@ public class convertModel {
 			// 1, 2, and 3mer features
 			P = 4 * Main.mers + 16 * (Main.mers + 1 - 2) + 64
 					* (Main.mers + 1 - 3);
+		} else if (Main.feat13) {
+			P = 4 * Main.mers + 64 * (Main.mers + 1 - 3);
 		}
 		// create SV (1xN)
 		double[] sv = new double[N];
@@ -48,35 +52,25 @@ public class convertModel {
 			st = new StringTokenizer(line);
 			// weight
 			sv[lineNumber] = Double.parseDouble(st.nextToken());
-			String token = st.nextToken();
-			// feature that has a one, keeps track of when to move to next token
-			int currentFeature = Integer.parseInt(token.substring(0,
-					token.indexOf(":")));
-			for (int i = 0; i < P; i++) {
+			while (st.hasMoreTokens()) {
 				// feature
-				if (i == currentFeature - 1) {
-					d[lineNumber][i] = 1;
-					if (st.hasMoreTokens()) {
-						token = st.nextToken();
-						currentFeature = Integer.parseInt(token.substring(0,
-								token.indexOf(":")));
-					}
-				} else {
-					// replace with a 0
-					d[lineNumber][i] = 0;
-				}
+				String token = st.nextToken();
+				d[lineNumber][Integer.parseInt(token.substring(0,
+						token.indexOf(":")))-1] = 1;
 			}
 			line = fp.readLine();
 			lineNumber++;
 		}
 		// multiply the two matrices
 		double[] r = new double[P];
-		PrintWriter writer = new PrintWriter("r", "UTF-8");
+		PrintWriter writer = new PrintWriter(file + ".txt", "UTF-8");
 		for (int i = 0; i < P; i++) {
+			/*
 			// ignore the features that have the core
 			if (ignoreFeat(i)) {
 				continue;
 			}
+			*/
 			double sum = 0;
 			for (int j = 0; j < N; j++) {
 				sum += sv[i] * d[j][i];
