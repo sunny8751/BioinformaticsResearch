@@ -43,7 +43,7 @@ public class Main {
 			iteration = i;
 			if (!finalModel) {
 				GridSearch.Start();
-			}
+			} 
 			if (noTrain) {
 				finalModel = false;
 			}
