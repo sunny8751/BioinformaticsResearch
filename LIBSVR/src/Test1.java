@@ -18,20 +18,24 @@ public class Test1 {
 		int counter = 1;
 		PrintWriter writer = new PrintWriter("featureMeaning.txt", "UTF-8");
 		writer.print("feature seq pos");
+		writer.println();
 		for (int i = 0; i < 4*Main.mers+64*(Main.mers-2); i++) {
 			//only for feat13
 			String seq;
-			int pos;
-			if(i<4*(Main.mers-4)){
-				pos = (int) Math.ceil((i+1)/4);
-				seq = test(i%4+1, 1);
+			int pos, j = i;
+			if(j<4*(Main.mers)){
+				Main.features = 1;
+				pos = (int) Math.ceil((j+1)/4f);
+				seq = test(j%4+1, 1);
 			}else{
-				i-=4*(Main.mers-4);
-				pos = (int) Math.ceil((i+1)/64);
-				seq = test(i%64+1, 3);
+				j-=4*(Main.mers);
+				Main.features = 3;
+				pos = (int) Math.ceil((j+1)/64f);
+				seq = test(j%64+1, 3);
 			}
-			if (pos < Main.mers / 2 - 2 || pos >= Main.mers / 2 + 2 + (1 - Main.features)) {
+			if (pos-1 < Main.mers / 2 - 2 || pos-1 >= Main.mers / 2 + 2 + (1 - Main.features)) {
 				writer.print(counter+" "+seq+" "+pos);
+				writer.println();
 				counter ++;
 			}
 		}
