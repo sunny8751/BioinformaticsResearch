@@ -16,7 +16,7 @@ public class Main {
 	// no train- terminate program after creating files? false=keep doing stuff
 	// finalModel- stop grid search and start creating model against test data?
 	// allFeat- features 1, 2, and 3
-	static boolean noTrain = true, finalModel = false, feat13 = true,
+	static boolean noTrain = false, finalModel = false, feat13 = true,
 			allFeat = false;
 	static String train = "", test = "";
 	// features: k feature
@@ -38,7 +38,7 @@ public class Main {
 	public static void main(String[] args) throws IOException {
 		Main m = new Main();
 		// in order to do all of them at once
-		for (int i = 2; i <= 2; i++) {
+		for (int i = 1; i <= 10; i++) {
 			System.out.println("ITERATION DATA " + i);
 			iteration = i;
 			if (!finalModel) {
@@ -216,6 +216,7 @@ public class Main {
 					// print the feature value and its corresponding value
 					// only include features that aren't only core
 					if (i < mers / 2 - 2 || i >= mers / 2 + 2 + (1 - features)) {
+						//feature location+position+base pos
 						writer.print(" "
 								+ (int) (valueShift
 										+ test(seq.substring(i, i + features),
