@@ -16,7 +16,7 @@ public class Main {
 	// no train- terminate program after creating files? false=keep doing stuff
 	// finalModel- stop grid search and start creating model against test data?
 	// allFeat- features 1, 2, and 3
-	static boolean noTrain = false, finalModel = false, feat13 = true,
+	static boolean noTrain = true, finalModel = false, feat13 = true,
 			allFeat = false;
 	static String train = "", test = "";
 	// features: k feature
@@ -38,7 +38,7 @@ public class Main {
 	public static void main(String[] args) throws IOException {
 		Main m = new Main();
 		// in order to do all of them at once
-		for (int i = 1; i <= 10; i++) {
+		for (int i = 2; i <= 2; i++) {
 			System.out.println("ITERATION DATA " + i);
 			iteration = i;
 			if (!finalModel) {
@@ -208,6 +208,7 @@ public class Main {
 						valueShift = 4 * (mers - 4);
 					}
 				}
+				int counter = 0;
 				for (int i = 0; i < seq.length() + 1 - features; i++) {
 					// each position of sequence
 					// find the value for each position with respect to the
@@ -218,8 +219,9 @@ public class Main {
 						writer.print(" "
 								+ (int) (valueShift
 										+ test(seq.substring(i, i + features),
-												features) + i
+												features) + counter
 										* Math.pow(4, features)) + ": 1");
+						counter ++;
 					}
 				}
 				if (allFeat || feat13) {
