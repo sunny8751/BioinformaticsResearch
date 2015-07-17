@@ -36,9 +36,14 @@ public class Main {
 
 	// converts file to supported format
 	public static void main(String[] args) throws IOException {
+		args = new String[] { "E2F1" };
 		Main m = new Main();
 		// in order to do all of them at once
-		for (int i = 1; i <= 10; i++) {
+		/*
+		 * for(int j = 0; j<2; j++){ String tf = "E2F1"; if(j==1){ tf = "E2F4";
+		 * }
+		 */
+		for (int i = 1; i <= 1; i++) {
 			System.out.println("ITERATION DATA " + i);
 			iteration = i;
 			if (!finalModel) {
@@ -47,8 +52,8 @@ public class Main {
 			if (noTrain) {
 				finalModel = false;
 			}
-			train = "_train" + i + ".txt";
-			test = "_test" + i + ".txt";
+			train = "train" + i + args[0] + ".txt";
+			test = "test" + i + args[0] + ".txt";
 			// select the subgroup of sequences to analyze and reformat
 			m.select(train, true);
 			// do the same with the test file
@@ -68,11 +73,9 @@ public class Main {
 				svm_train.main(new String[] { "-q", "-c",
 						Double.toString(params[2 * counter]), "-p",
 						Double.toString(params[2 * counter + 1]), "-s", "3",
-						"-t", "0", "scaled-converted-selected-train" });
-				svm_predict
-						.main(new String[] { "scaled-converted-selected-test",
-								"scaled-converted-selected-train.model",
-								"output.txt" });
+						"-t", "0", "converted-selected-train" });
+				svm_predict.main(new String[] { "converted-selected-test",
+						"converted-selected-train.model", "output.txt" });
 			}
 			// done
 			writer.close();
@@ -80,9 +83,7 @@ public class Main {
 	}
 
 	public Main() throws FileNotFoundException, UnsupportedEncodingException {
-		params = new double[] { 0.06, 0.12
-
-		};
+		params = new double[] { .06125, .06125 };
 		if (finalModel) {
 			writer = new PrintWriter("models", "UTF-8");
 			// print c
@@ -95,16 +96,14 @@ public class Main {
 		}
 	}
 
-	public static void add(String s1, String s2) {
+	public static void add(Double score) {
 		// add this score to models from the prediction with the test set
 		// print c
 		writer.print(params[2 * counter] + " ");
 		// print p
 		writer.print(params[2 * counter + 1] + " ");
 		// print score
-		writer.print(s1);
-		writer.println();
-		writer.print(s2);
+		writer.print(score.toString());
 		writer.println();
 	}
 
@@ -134,35 +133,20 @@ public class Main {
 			// this is only to count initial seq amount and see if seq contains
 			// core
 			// this is to print selected seqs back to a new file
-			nfp = new BufferedReader(new FileReader(arg));
 			int max = size;
 			// calculate the new size of the seqs that have been selected
 			size = 0;
 			for (int i = 0; i < max; i++) {
 				st = new StringTokenizer(fp.readLine());
-				st.nextToken();
-				// countTokens() method returns remaining number of characters
+				String score = st.nextToken();
 				// makes sure seq contains core seq that is in middle
 				String seq = st.nextToken();
 				if (seq.indexOf(core) == mers / 2 - 2) {
 					// select this
-					if ((core.equals("GCGC")
-							&& !seq.substring(mers / 2 - 4, mers / 2 - 4 + 2)
-									.equals("GC") && !seq.substring(
-							mers / 2 + 2, mers / 2 + 2 + 2).equals("GC"))) {
-						st = new StringTokenizer(nfp.readLine());
-						writer.print(st.nextToken() + " ");
-						writer.print(st.nextToken());
-						writer.println();
-						size++;
-					} else {
-						nfp.readLine();
-					}
-				} else {
-					nfp.readLine();
+					writer.println(score + "\t" + seq);
+					size++;
 				}
 			}
-			nfp.close();
 		}
 		fp.close();
 		writer.close();
@@ -216,13 +200,13 @@ public class Main {
 					// print the feature value and its corresponding value
 					// only include features that aren't only core
 					if (i < mers / 2 - 2 || i >= mers / 2 + 2 + (1 - features)) {
-						//feature location+position+base pos
+						// feature location+position+base pos
 						writer.print(" "
 								+ (int) (valueShift
 										+ test(seq.substring(i, i + features),
 												features) + counter
 										* Math.pow(4, features)) + ": 1");
-						counter ++;
+						counter++;
 					}
 				}
 				if (allFeat || feat13) {

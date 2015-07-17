@@ -1,8 +1,15 @@
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.StringTokenizer;
 
 public class GridSearch {
 
@@ -24,6 +31,10 @@ public class GridSearch {
 		if (course) {
 			return Math.pow(2, index - 7);
 		} else {
+			if (index == 3) {
+				index++;
+				counterC++;
+			}
 			return yC + mC * index;
 		}
 	}
@@ -37,6 +48,10 @@ public class GridSearch {
 		if (course) {
 			return Math.pow(2, index - 9);
 		} else {
+			if (index == 3) {
+				index++;
+				counterP++;
+			}
 			return yP + index * mP;
 		}
 	}
@@ -47,12 +62,11 @@ public class GridSearch {
 		maxNumP = 8;
 		values = new double[maxNumP][maxNumC];
 		writer = new PrintWriter("courseErrors" + Main.iteration, "UTF-8");
-		writer.print(" ");
 		for (int i = 0; i < maxNumP; i++) {
-			writer.print(getP(i) + " ");
+			writer.print("\t" + getP(i));
 		}
 		writer.println();
-		writer.print(getC(0) + " ");
+		writer.print(getC(0) + "\t");
 	}
 
 	public static void go() throws IOException {
@@ -70,9 +84,9 @@ public class GridSearch {
 		// argv = new String[] { "converted-selected-"+Main.train,
 		// "converted-selected-test.txt"};
 		// initialize
-		Start();
+		// Start();
 		// start training the first pair of parameters
-		train();
+		// train();
 	}
 
 	public static void add(double value) {
@@ -88,69 +102,104 @@ public class GridSearch {
 			System.out.println(counterP + ", " + counterC);
 		}
 		System.out.println(value);
-		writer.print(value + " ");
-		values[counterP][counterC] = value;
+		if (course) {
+			writer.print(value + "\t");
+			values[counterP][counterC] = value;
+		} else {
+			for (int i = 0; i < 7; i++) {
+				int cIndex = cValues.indexOf(getC(i));
+				for (int j = 0; j < 7; j++) {
+					int pIndex = pValues.indexOf(getP(j));
+					values[pIndex][cIndex] = value;
+					return;
+				}
+			}
+		}
+		// PUT NOTHING HERE CUZ OF THE RETURN
 	}
+
+	private static List<Double> pValues;
+	private static List<Double> cValues;
 
 	private static void fine() throws IOException {
 		counterP = 0;
 		counterC = 0;
 		//
 		// get min and max values of p and c of top 3 R^2 values
-		int[] pValues = new int[3], cValues = new int[3];
-		double[] top3 = topValues(3);
+		int pValue, cValue;
+		double topValue = topValues(1)[0];
 		// allocate to pValues and cValues
-		for (int i = 0; i < 3; i++) {
-			// find the value in ascendingValues
-			// p and c values no longer in ascending order
-			pValues[i] = findIndices(top3[i], values)[0];
-			cValues[i] = findIndices(top3[i], values)[1];
-		}
-		Arrays.sort(pValues);
-		Arrays.sort(cValues);
+		// find the p and c values
+		pValue = findIndices(topValue, values)[0];
+		cValue = findIndices(topValue, values)[1];
 		// set the getP() and getC() variables now
-		if (top3[2] >= top3[1] + .02D) {
-			System.out.println("Method 1");
-			// if top value is way above the other 2
-			// just consider the top value
-			int middleP = findIndices(top3[2], values)[0];
-			int middleC = findIndices(top3[2], values)[1];
-			mP = getP(middleP) * .2f;
-			mC = getC(middleC) * .2f;
-			yP = getP(middleP) - mP * 3;
-			yC = getC(middleC) - mC * 3;
-			course = false;
-		} else if (pValues[2] == maxNumP - 1 || cValues[2] == maxNumC - 1
-				|| pValues[2] == 0 || cValues[2] == 0) {
-			System.out.println("Method 2");
-			// if the highest value is on the edge of course grid search
-			int middleP = findIndices(top3[2], values)[0];
-			int middleC = findIndices(top3[2], values)[1];
-			mP = getP(middleP) * .2f;
-			mC = getC(middleC) * .2f;
-			yP = getP(middleP) - mP * 3;
-			yC = getC(middleC) - mC * 3;
-		} else {
-			System.out.println("Method 3");
-			yP = getP(pValues[0]);
-			yC = getC(cValues[0]);
-			mP = (getP(pValues[2]) - getP(pValues[0])) / 6f;
-			mC = (getC(cValues[2]) - getC(cValues[0])) / 6f;
-		}
+		mC = getC(cValue) * 1.5 / 7d;
+		yC = getC(cValue) - 3 * mC;
+		mP = getP(pValue) * 1.5 / 7d;
+		yP = getP(pValue) - 3 * mP;
 		System.out.println("yP" + yP + ", mP" + mP + ", yC" + yC + ", mC" + mC);
-		System.out.println("TOP: "+top3[2]);
 		maxNumC = 7;
 		maxNumP = 7;
-		course = false;
 		values = new double[maxNumP][maxNumC];
-		// setup the writer
-		writer = new PrintWriter("fineErrors" + Main.iteration, "UTF-8");
-		writer.print(" ");
-		for (int i = 0; i < maxNumP; i++) {
-			writer.print(getP(i) + " ");
+		// get the values from courseErrors in arraylist
+		pValues = new ArrayList<Double>();
+		cValues = new ArrayList<Double>();
+		values = new double[8][8];
+		BufferedReader bf = new BufferedReader(new FileReader("courseErrors"
+				+ Main.iteration));
+		for (int i = 0; i < 9; i++) {
+			// c
+			StringTokenizer st = new StringTokenizer(bf.readLine());
+			if (i == 0) {
+				// first line
+				while (st.hasMoreTokens()) {
+					pValues.add(Double.parseDouble(st.nextToken()));
+				}
+			} else {
+				// beginning of each line, add to cValues
+				cValues.add(Double.parseDouble(st.nextToken()));
+				// p,c
+				// counter for p
+				for (int j = 0; j < 8; j++) {
+					// p
+					values[j][i - 1] = Double.parseDouble(st.nextToken());
+				}
+			}
 		}
-		writer.println();
-		writer.print(getC(0) + " ");
+		bf.close();
+		// add spaces for the fine grid search values
+		double[][] courseValues = values;
+		values = new double[14][14];
+		for (int i = 0; i < 7; i++) {
+			if (i == 3) {
+				continue;
+			}
+			// c values
+			cValues.add(yC + i * mC);
+			// p values
+			pValues.add(yP + i * mP);
+		}
+		Collections.sort(cValues);
+		Collections.sort(pValues);
+		// add the course values into values
+		// at the right positions
+		for (int i = 0; i < 8; i++) {
+			int cIndex = cValues.indexOf(getC(i));
+			for (int j = 0; j < 8; j++) {
+				int pIndex = pValues.indexOf(getP(j));
+				// System.out.println(getP(j) + ", " + pIndex);
+				values[pIndex][cIndex] = courseValues[j][i];
+			}
+		}
+		writer = new PrintWriter("analysis" + Main.iteration, "UTF-8");
+		for (int i = 0; i < 14; i++) {
+			for (int j = 0; j < 14; j++) {
+				writer.print(values[j][i] + "\t");
+			}
+			writer.println();
+		}
+		writer.close();
+		course = false;
 		train();
 	}
 
@@ -197,19 +246,39 @@ public class GridSearch {
 		// if not, then continue training
 		if (counterC == maxNumC - 1 && counterP == maxNumP - 1) {
 			// done
-			writer.close();
 			// if course, do fine now
 			if (course) {
-				counterP = 0;
-				counterC = 0;
+				writer.close();
+				// counterP = 0;
+				// counterC = 0;
 				started = false;
-				//System.out.println("STARTING FINE SEARCH.............");
+				// System.out.println(topValues(1)[0]);
+				fine();
+				// System.out.println("STARTING FINE SEARCH.............");
 				/*
 				 * dont need to set counter to 0... already done in fine()
 				 * fine();
 				 */
 				return;
 			} else {
+				// write to errors file
+				// setup the writer
+				writer = new PrintWriter("errors" + Main.iteration, "UTF-8");
+				writer.print("P, C");
+				for (int i = 0; i < 14; i++) {
+					writer.print("\t" + cValues.get(i));
+				}
+				for (int i = 0; i < 14; i++) {
+					// each line
+					writer.println();
+					writer.print(pValues.get(i));
+					// print the error values now
+					for (int j = 0; j < 14; j++) {
+						writer.print("\t" + values[i][j]);
+					}
+				}
+				writer.close();
+
 				// try top 5 and find best model
 				counterP = 0;
 				counterC = 0;
@@ -229,7 +298,7 @@ public class GridSearch {
 			counterP = 0;
 			counterC++;
 			writer.println();
-			writer.print(getC(counterC) + " ");
+			writer.print(getC(counterC) + "\t");
 		}
 		train();
 	}

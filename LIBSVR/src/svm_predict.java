@@ -114,19 +114,22 @@ class svm_predict {
 		}
 		if (svm_type == svm_parameter.EPSILON_SVR
 				|| svm_type == svm_parameter.NU_SVR) {
+			/*
 			svm_predict.info("Mean squared error = " + error / total
 					+ " (regression)\n");
 			svm_predict.info("Squared correlation coefficient = "
 					+ ((total * sumvy - sumv * sumy) * (total * sumvy - sumv
 							* sumy))
 					/ ((total * sumvv - sumv * sumv) * (total * sumyy - sumy
-							* sumy)) + " (regression)\n");
-			Main.add("Mean squared error = " + error / total
-					+ " (regression)", "Squared correlation coefficient = "
-							+ ((total * sumvy - sumv * sumy) * (total * sumvy - sumv
+							* sumy)) + " (regression)\n");*/
+			Main.add(((total * sumvy - sumv * sumy) * (total * sumvy - sumv
 									* sumy))
 							/ ((total * sumvv - sumv * sumv) * (total * sumyy - sumy
-									* sumy)) + " (regression)");
+									* sumy)));
+			svm_predict.info(Double.toString(((total * sumvy - sumv * sumy) * (total * sumvy - sumv
+									* sumy))
+							/ ((total * sumvv - sumv * sumv) * (total * sumyy - sumy
+									* sumy))));
 			
 		} else
 			svm_predict.info("Accuracy = " + (double) correct / total * 100

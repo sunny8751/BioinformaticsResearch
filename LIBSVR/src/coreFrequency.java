@@ -9,9 +9,11 @@ import java.util.StringTokenizer;
 public class coreFrequency {
 
 	public static void main(String[] args) throws IOException {
-int i = 1;
-		System.out.println("train"+(i+1));
-			run("train"+(i+1));
+		//int i = 1;
+		//System.out.println("train"+(i+1));
+		//run("train"+(i+1));
+		Main.mers = 36;
+		run("newE2F4");
 	}
 	private static void run(String file) throws IOException{
 		List <String> cores = new ArrayList<String>();
@@ -23,7 +25,7 @@ int i = 1;
 			StringTokenizer st = new StringTokenizer (line);
 			st.nextToken();
 			//because position starts at 0
-			String core = st.nextToken().substring((int)Math.floor((Main.mers+1)/2d)-2, (int)Math.ceil((Main.mers+1)/2d)+1);
+			String core = st.nextToken().substring(Main.mers/2-2, Main.mers/2+2);
 			if(cores.contains(core)){
 				//add one to freq
 				coreFreq.set(cores.indexOf(core), coreFreq.get(cores.indexOf(core))+1);
