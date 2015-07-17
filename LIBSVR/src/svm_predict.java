@@ -126,10 +126,11 @@ class svm_predict {
 									* sumy))
 							/ ((total * sumvv - sumv * sumv) * (total * sumyy - sumy
 									* sumy)));
+			/*
 			svm_predict.info(Double.toString(((total * sumvy - sumv * sumy) * (total * sumvy - sumv
 									* sumy))
 							/ ((total * sumvv - sumv * sumv) * (total * sumyy - sumy
-									* sumy))));
+									* sumy))));*/
 			
 		} else
 			svm_predict.info("Accuracy = " + (double) correct / total * 100

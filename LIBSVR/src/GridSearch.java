@@ -17,10 +17,12 @@ public class GridSearch {
 
 	private static int counterP = 0, counterC = 0;
 	private static boolean course = true;
-	private static double[][] values;
+	//PxC
+	public static double[][] values;
 	private static long startTime;
 	private static PrintWriter writer;
 	private static boolean started = false;
+	public static List<Double> pValues, cValues;
 
 	private static int maxNumC;
 	// y-intercept and slope?
@@ -106,20 +108,13 @@ public class GridSearch {
 			writer.print(value + "\t");
 			values[counterP][counterC] = value;
 		} else {
-			for (int i = 0; i < 7; i++) {
-				int cIndex = cValues.indexOf(getC(i));
-				for (int j = 0; j < 7; j++) {
-					int pIndex = pValues.indexOf(getP(j));
-					values[pIndex][cIndex] = value;
-					return;
-				}
-			}
+			int cIndex = cValues.indexOf(getC(counterC));
+			int pIndex = pValues.indexOf(getP(counterP));
+			values[pIndex][cIndex] = value;
+			return;
 		}
 		// PUT NOTHING HERE CUZ OF THE RETURN
 	}
-
-	private static List<Double> pValues;
-	private static List<Double> cValues;
 
 	private static void fine() throws IOException {
 		counterP = 0;
@@ -268,13 +263,19 @@ public class GridSearch {
 				for (int i = 0; i < 14; i++) {
 					writer.print("\t" + cValues.get(i));
 				}
+				//p
 				for (int i = 0; i < 14; i++) {
 					// each line
 					writer.println();
 					writer.print(pValues.get(i));
 					// print the error values now
+					//c
 					for (int j = 0; j < 14; j++) {
-						writer.print("\t" + values[i][j]);
+						if (values[i][j] == 0) {
+							writer.print("\t");
+						} else {
+							writer.print("\t" + values[i][j]);
+						}
 					}
 				}
 				writer.close();
@@ -282,13 +283,11 @@ public class GridSearch {
 				// try top 5 and find best model
 				counterP = 0;
 				counterC = 0;
+				course = true;
 				started = false;
 				// return to main and do next iteration
 				System.out.println("DONE WITH ITERATION.............");
 				// highest score
-				double top = topValues(1)[0];
-				System.out.println(top + " at " + findIndices(top, values)[0]
-						+ ", " + findIndices(top, values)[1]);
 				return;
 			}
 		}

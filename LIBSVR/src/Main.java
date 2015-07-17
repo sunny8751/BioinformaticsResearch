@@ -4,6 +4,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.StringTokenizer;
 
 public class Main {
@@ -43,7 +44,8 @@ public class Main {
 		 * for(int j = 0; j<2; j++){ String tf = "E2F1"; if(j==1){ tf = "E2F4";
 		 * }
 		 */
-		for (int i = 1; i <= 1; i++) {
+		writer = new PrintWriter("models", "UTF-8");
+		for (int i = 2; i <= 10; i++) {
 			System.out.println("ITERATION DATA " + i);
 			iteration = i;
 			if (!finalModel) {
@@ -63,9 +65,57 @@ public class Main {
 			 * "converted-selected-train", "converted-selected-test" });
 			 */
 			// start training
-			if (!Main.finalModel && !Main.noTrain) {
+			if (!finalModel && !noTrain) {
 				GridSearch.go();
 			}
+			// get top 5 values
+			double[] ascendingValues = new double[14 * 14];
+			int index = 0;
+			for (int a = 0; a < 14; a++) {
+				for (int b = 0; b < 14; b++) {
+					ascendingValues[index] = GridSearch.values[a][b];
+					index++;
+				}
+			}
+			Arrays.sort(ascendingValues);
+			params = new double[2 * 5];
+			for (int a = 0; a < 5; a++) {
+				// c, p
+				// find the c & p indices of the top value
+				int pIndex = -1, cIndex = -1;
+				for (int x = 0; x < 14; x++) {
+					for (int y = 0; y < 14; y++) {
+						if (GridSearch.values[y][x] == ascendingValues[ascendingValues.length
+								- 1 - i]) {
+							pIndex = y;
+							cIndex = x;
+							break;
+						}
+					}
+					if(pIndex!=-1){
+						break;
+					}
+				}
+				params[2 * a] = GridSearch.cValues.get(cIndex);
+				params[2 * a + 1] = GridSearch.cValues.get(pIndex);
+			}
+			// get models for these values
+			finalModel = true;
+			writer.print("ITERATION " + i);
+			writer.println();
+			for (counter = 0; counter < 5; counter++) {
+				svm_train.main(new String[] { "-q", "-c",
+						Double.toString(params[2 * counter]), "-p",
+						Double.toString(params[2 * counter + 1]), "-s", "3",
+						"-t", "0", "converted-selected-train" });
+				svm_predict.main(new String[] { "converted-selected-test",
+						"converted-selected-train.model", "output.txt" });
+				System.out.println();
+			}
+			// done
+			writer.close();
+			finalModel = false;
+			// ok next dataset now
 		}
 		// if final model
 		if (finalModel) {
@@ -99,12 +149,16 @@ public class Main {
 	public static void add(Double score) {
 		// add this score to models from the prediction with the test set
 		// print c
-		writer.print(params[2 * counter] + " ");
-		// print p
-		writer.print(params[2 * counter + 1] + " ");
+		writer.print(params[2 * counter] + "\t");
+		System.out.print (params[2 * counter] + "\t");
+		// print pp
+		System.out.print (params[2 * counter + 1] + "\t");
+		writer.print(params[2 * counter + 1] + "\t");
 		// print score
 		writer.print(score.toString());
 		writer.println();
+		System.out.print (score.toString());
+		System.out.println();
 	}
 
 	private void select(String arg, boolean training) throws IOException {
