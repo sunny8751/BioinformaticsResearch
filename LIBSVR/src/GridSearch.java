@@ -258,7 +258,7 @@ public class GridSearch {
 			} else {
 				// write to errors file
 				// setup the writer
-				writer = new PrintWriter("errors" + Main.iteration, "UTF-8");
+				writer = new PrintWriter("errors" + Main.iteration+".txt", "UTF-8");
 				writer.print("P, C");
 				for (int i = 0; i < 14; i++) {
 					writer.print("\t" + cValues.get(i));

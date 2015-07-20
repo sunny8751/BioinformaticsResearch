@@ -19,10 +19,9 @@ public class Main {
 	// allFeat- features 1, 2, and 3
 	static boolean noTrain = false, finalModel = false, feat13 = true,
 			allFeat = false;
-	static String train = "", test = "";
 	// features: k feature
 	static int features = 1, mers = 34;
-	private BufferedReader fp, nfp;
+	private BufferedReader fp;
 	private StringTokenizer st;
 	// size: number of lines in the file
 	private int size;
@@ -31,99 +30,105 @@ public class Main {
 	private static double[] params;
 	// form of -c, -p
 	private static PrintWriter writer;
-	private static int counter;
+	private static int modelCounter = 0;
 
 	public static int iteration;
 
 	// converts file to supported format
 	public static void main(String[] args) throws IOException {
-		args = new String[] { "E2F1" };
+		args = new String[] { "E2F4" };
 		Main m = new Main();
 		// in order to do all of them at once
 		/*
 		 * for(int j = 0; j<2; j++){ String tf = "E2F1"; if(j==1){ tf = "E2F4";
 		 * }
 		 */
-		writer = new PrintWriter("models", "UTF-8");
-		for (int i = 2; i <= 10; i++) {
-			System.out.println("ITERATION DATA " + i);
-			iteration = i;
-			if (!finalModel) {
-				GridSearch.Start();
-			}
-			if (noTrain) {
-				finalModel = false;
-			}
-			train = "train" + i + args[0] + ".txt";
-			test = "test" + i + args[0] + ".txt";
-			// select the subgroup of sequences to analyze and reformat
-			m.select(train, true);
-			// do the same with the test file
-			m.select(test, false);
-			/*
-			 * // next scale the feature data svm_scale.main(new String[] {
-			 * "converted-selected-train", "converted-selected-test" });
-			 */
-			// start training
-			if (!finalModel && !noTrain) {
-				GridSearch.go();
-			}
-			// get top 5 values
-			double[] ascendingValues = new double[14 * 14];
-			int index = 0;
-			for (int a = 0; a < 14; a++) {
-				for (int b = 0; b < 14; b++) {
-					ascendingValues[index] = GridSearch.values[a][b];
-					index++;
+		if (!finalModel) {
+			writer = new PrintWriter("models", "UTF-8");
+			for (int i = 6; i <= 10; i++) {
+				System.out.println("ITERATION DATA " + i);
+				iteration = i;
+				if (!finalModel) {
+					GridSearch.Start();
 				}
-			}
-			Arrays.sort(ascendingValues);
-			params = new double[2 * 5];
-			for (int a = 0; a < 5; a++) {
-				// c, p
-				// find the c & p indices of the top value
-				int pIndex = -1, cIndex = -1;
-				for (int x = 0; x < 14; x++) {
-					for (int y = 0; y < 14; y++) {
-						if (GridSearch.values[y][x] == ascendingValues[ascendingValues.length
-								- 1 - i]) {
-							pIndex = y;
-							cIndex = x;
+				if (noTrain) {
+					finalModel = false;
+				}
+				train = "train" + i + args[0] + ".txt";
+				test = "test" + i + args[0] + ".txt";
+				// select the subgroup of sequences to analyze and reformat
+				m.select(train, true);
+				// do the same with the test file
+				m.select(test, false);
+				/*
+				 * // next scale the feature data svm_scale.main(new String[] {
+				 * "converted-selected-train", "converted-selected-test" });
+				 */
+				// start training
+				if (!finalModel && !noTrain) {
+					GridSearch.go();
+				}
+				// get top 5 values
+				double[] ascendingValues = new double[14 * 14];
+				int index = 0;
+				for (int a = 0; a < 14; a++) {
+					for (int b = 0; b < 14; b++) {
+						ascendingValues[index] = GridSearch.values[a][b];
+						index++;
+					}
+				}
+				Arrays.sort(ascendingValues);
+				params = new double[2 * 5];
+				for (int a = 0; a < 5; a++) {
+					// c, p
+					// find the c & p indices of the top value
+					int pIndex = -1, cIndex = -1;
+					for (int x = 0; x < 14; x++) {
+						for (int y = 0; y < 14; y++) {
+							if (GridSearch.values[y][x] == ascendingValues[ascendingValues.length
+									- 1 - a]) {
+								pIndex = y;
+								cIndex = x;
+								break;
+							}
+						}
+						if (pIndex != -1) {
 							break;
 						}
 					}
-					if(pIndex!=-1){
-						break;
-					}
+					params[2 * a] = GridSearch.cValues.get(cIndex);
+					params[2 * a + 1] = GridSearch.cValues.get(pIndex);
+					// System.out.println("indices "+cIndex+", "+pIndex);
+					// System.out.println("top: "+ascendingValues[modelCounter]);
 				}
-				params[2 * a] = GridSearch.cValues.get(cIndex);
-				params[2 * a + 1] = GridSearch.cValues.get(pIndex);
+				// get models for these values
+				finalModel = true;
+				writer.print("ITERATION " + i);
+				writer.println();
+				for (modelCounter = 0; modelCounter < 5; modelCounter++) {
+					svm_train.main(new String[] { "-q", "-c",
+							Double.toString(params[2 * modelCounter]), "-p",
+							Double.toString(params[2 * modelCounter + 1]),
+							"-s", "3", "-t", "0", "converted-selected-train" });
+					svm_predict.main(new String[] { "converted-selected-test",
+							"converted-selected-train.model", "output.txt" });
+				}
+				// done
+				writer.close();
+				finalModel = false;
+				// ok next dataset now
 			}
-			// get models for these values
-			finalModel = true;
-			writer.print("ITERATION " + i);
-			writer.println();
-			for (counter = 0; counter < 5; counter++) {
+		} else {
+			// if final model
+			//select and convert
+			m.select(train, true);
+			// do the same with the test file
+			m.select(test, false);
+			for (modelCounter = 0; modelCounter < (int) params.length / 2; modelCounter++) {
 				svm_train.main(new String[] { "-q", "-c",
-						Double.toString(params[2 * counter]), "-p",
-						Double.toString(params[2 * counter + 1]), "-s", "3",
-						"-t", "0", "converted-selected-train" });
-				svm_predict.main(new String[] { "converted-selected-test",
-						"converted-selected-train.model", "output.txt" });
-				System.out.println();
-			}
-			// done
-			writer.close();
-			finalModel = false;
-			// ok next dataset now
-		}
-		// if final model
-		if (finalModel) {
-			for (counter = 0; counter < (int) params.length / 2; counter++) {
-				svm_train.main(new String[] { "-q", "-c",
-						Double.toString(params[2 * counter]), "-p",
-						Double.toString(params[2 * counter + 1]), "-s", "3",
-						"-t", "0", "converted-selected-train" });
+						Double.toString(params[2 * modelCounter]), "-p",
+						Double.toString(params[2 * modelCounter + 1]), "-s",
+						"3", "-t", "0", "converted-selected-train" });
 				svm_predict.main(new String[] { "converted-selected-test",
 						"converted-selected-train.model", "output.txt" });
 			}
@@ -132,14 +137,17 @@ public class Main {
 		}
 	}
 
+	static String train = "train10E2F1.txt", test = "test10E2F1.txt";
 	public Main() throws FileNotFoundException, UnsupportedEncodingException {
-		params = new double[] { .06125, .06125 };
+		params = new double[] {
+				0.03125,	0.03125
+};
 		if (finalModel) {
 			writer = new PrintWriter("models", "UTF-8");
 			// print c
-			writer.print("c ");
+			writer.print("c\t");
 			// print p
-			writer.print("p ");
+			writer.print("p\t");
 			// print value
 			writer.print("value");
 			writer.println();
@@ -149,15 +157,15 @@ public class Main {
 	public static void add(Double score) {
 		// add this score to models from the prediction with the test set
 		// print c
-		writer.print(params[2 * counter] + "\t");
-		System.out.print (params[2 * counter] + "\t");
+		writer.print(params[2 * modelCounter] + "\t");
+		System.out.print(params[2 * modelCounter] + "\t");
 		// print pp
-		System.out.print (params[2 * counter + 1] + "\t");
-		writer.print(params[2 * counter + 1] + "\t");
+		System.out.print(params[2 * modelCounter + 1] + "\t");
+		writer.print(params[2 * modelCounter + 1] + "\t");
 		// print score
 		writer.print(score.toString());
 		writer.println();
-		System.out.print (score.toString());
+		System.out.print(score.toString());
 		System.out.println();
 	}
 
@@ -214,7 +222,6 @@ public class Main {
 	private void run(String arg) throws IOException {
 		// converts to right format
 		fp = new BufferedReader(new FileReader(arg));
-		nfp = new BufferedReader(new FileReader(arg));
 
 		PrintWriter writer;
 		writer = new PrintWriter("converted-" + arg, "UTF-8");

@@ -9,7 +9,8 @@ public class convertModel {
 	public static void main(String[] args) throws IOException {
 		// new convertModel().run();
 		convertModel cm = new convertModel();
-		for (int i = 2; i <= 10; i++) {
+		for (int i = 1; i <= 10; i++) {
+			// cm.convert("data" + i + "_E2F1_CoreGCGC_Feat13");
 			cm.convert("13FeatNoCore(Data" + i + ")");
 		}
 	}
@@ -37,7 +38,11 @@ public class convertModel {
 			P = 4 * Main.mers + 16 * (Main.mers + 1 - 2) + 64
 					* (Main.mers + 1 - 3);
 		} else if (Main.feat13) {
-			P = 4 * Main.mers + 64 * (Main.mers + 1 - 3);
+			if(Main.mers == 34){
+			P = 4 * (Main.mers - 4) + 64 * (Main.mers + 1 - 3 - 2);
+			}else{
+				P = 4*Main.mers + 64*(Main.mers -2);
+			}
 		}
 		// create SV (1xN)
 		double[] sv = new double[N];
@@ -56,24 +61,31 @@ public class convertModel {
 				// feature
 				String token = st.nextToken();
 				d[lineNumber][Integer.parseInt(token.substring(0,
-						token.indexOf(":")))-1] = 1;
+						token.indexOf(":"))) - 1] = 1;
 			}
 			line = fp.readLine();
 			lineNumber++;
 		}
+		PrintWriter writer1 = new PrintWriter("d.txt", "UTF-8");
+		for (int i = 0; i < N; i++) {
+			for (int j = 0; j < P; j++) {
+				writer1.print(d[i][j] + "\t");
+			}
+			writer1.println();
+		}
+		writer1.close();
+
 		// multiply the two matrices
 		double[] r = new double[P];
 		PrintWriter writer = new PrintWriter(file + ".txt", "UTF-8");
 		for (int i = 0; i < P; i++) {
 			/*
-			// ignore the features that have the core
-			if (ignoreFeat(i)) {
-				continue;
-			}
-			*/
+			 * // ignore the features that have the core if (ignoreFeat(i)) {
+			 * continue; }
+			 */
 			double sum = 0;
 			for (int j = 0; j < N; j++) {
-				sum += sv[i] * d[j][i];
+				sum += sv[j] * d[j][i];
 			}
 			r[i] = sum;
 			writer.print(sum);

@@ -16,17 +16,18 @@ public class Test1 {
 		// t.cutoff = 2;
 		// t.process("E2F4");
 		// t.compare();
-		String tf = "E2F1";
-		t.cutoff = .125;
+		String tf = "E2F4";
+		t.cutoff = 0.135;
+		//.125- E2F1
+		System.out.println(t.cutoff);
 		t.process(tf); // split into 10 versions
-		for (int i = 1; i <= 0; i++) {
+		for (int i = 1; i <= 10; i++) {
 			new ChangeData().run(Integer.toString(i), tf);
 		}
 		// partition
 		// t.cutoff(tf);
 		Main.main(new String[] { tf });
-
-	}
+		}
 
 	void partition(String tf) throws IOException {
 		BufferedReader data = new BufferedReader(new FileReader("processed"
