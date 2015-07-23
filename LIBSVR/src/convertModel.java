@@ -7,15 +7,13 @@ import java.util.StringTokenizer;
 public class convertModel {
 
 	public static void main(String[] args) throws IOException {
-		// new convertModel().run();
-		convertModel cm = new convertModel();
-		for (int i = 1; i <= 10; i++) {
-			// cm.convert("data" + i + "_E2F1_CoreGCGC_Feat13");
-			cm.convert("13FeatNoCore(Data" + i + ")");
+		for (int i = 1; i <= 9; i++) {
+			// convert("data" + i + "_E2F1_CoreGCGC_Feat13");
+			convert("data"+i+"_E2F4_CoreGCGC_Feat13");
 		}
 	}
 
-	void convert(String file) throws IOException {
+	public static void convert(String file) throws IOException {
 		// get the feat. contribution weight matrix (1xP)
 		// R = SV*D
 
@@ -66,6 +64,7 @@ public class convertModel {
 			line = fp.readLine();
 			lineNumber++;
 		}
+		/*
 		PrintWriter writer1 = new PrintWriter("d.txt", "UTF-8");
 		for (int i = 0; i < N; i++) {
 			for (int j = 0; j < P; j++) {
@@ -74,6 +73,7 @@ public class convertModel {
 			writer1.println();
 		}
 		writer1.close();
+		*/
 
 		// multiply the two matrices
 		double[] r = new double[P];

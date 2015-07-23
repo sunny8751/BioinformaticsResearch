@@ -1,37 +1,63 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
+import java.util.StringTokenizer;
 
 public class analyzeModel {
 
 	public static void main(String[] args) throws IOException {
+		int[] features = new int[] { 
+				59,
+				60,
+				61,
+				62
+		};
+		withFile(features);
+	}
+
+	public static void withFile(int[] features) throws IOException {
+		//get the feature seq and pos of feature # from the file featureMeaning.txt
+		BufferedReader br = new BufferedReader(new FileReader(
+				"featureMeaning.txt"));
+		int count = (int) br.lines().count();
+		for (int i = 0; i < features.length; i++) {
+			br = new BufferedReader(new FileReader("featureMeaning.txt"));
+			br.readLine();
+			for (int j = 0; j < count-1; j++) {
+				StringTokenizer st = new StringTokenizer(br.readLine());
+				if (Integer.parseInt(st.nextToken()) == features[i]) {
+					// found the right feature
+					System.out.println(st.nextToken() + "\t" + st.nextToken());
+					break;
+				}
+			}
+			br.close();
+		}
+	}
+
+	private static void withoutFile(int[] features) {
+		//theoretical meaning of feature # 
 		// see what the feature #s are
-		int[] features = new int[] {
-					1002,
-					1063,
-					1114,
-					1191,
-					1190
-			};
 		int feature = Main.features;
 		for (int a = 0; a < features.length; a++) {
-			//featureValues start from 1, 2, ... P
+			// featureValues start from 1, 2, ... P
 			int featureValue = features[a];
-			//compensate for combination of features
-			if(Main.allFeat){
-				if(featureValue<=4*Main.mers){
+			// compensate for combination of features
+			if (Main.allFeat) {
+				if (featureValue <= 4 * Main.mers) {
 					feature = 1;
-				} else if(featureValue<=16*Main.mers+4*Main.mers){
+				} else if (featureValue <= 16 * Main.mers + 4 * Main.mers) {
 					feature = 2;
-					featureValue -= 4*Main.mers;
-				}else{
+					featureValue -= 4 * Main.mers;
+				} else {
 					feature = 3;
-					featureValue -= 4*Main.mers + 16*Main.mers;
+					featureValue -= 4 * Main.mers + 16 * Main.mers;
 				}
-			}else if(Main.feat13){
-				
+			} else if (Main.feat13) {
+
 			}
-			//position starting from 1, 2, ... N
-			int position = (int) Math.ceil(featureValue
-					/ Math.pow(4, feature));
+			// position starting from 1, 2, ... N
+			int position = (int) Math.ceil(featureValue / Math.pow(4, feature));
 			featureValue -= (position - 1) * Math.pow(4, feature);
 			System.out.println(test(featureValue, feature) + " at " + position);
 		}

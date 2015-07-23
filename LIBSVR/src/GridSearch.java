@@ -17,7 +17,7 @@ public class GridSearch {
 
 	private static int counterP = 0, counterC = 0;
 	private static boolean course = true;
-	//PxC
+	// PxC
 	public static double[][] values;
 	private static long startTime;
 	private static PrintWriter writer;
@@ -258,18 +258,19 @@ public class GridSearch {
 			} else {
 				// write to errors file
 				// setup the writer
-				writer = new PrintWriter("errors" + Main.iteration+".txt", "UTF-8");
+				writer = new PrintWriter("errors" + Main.iteration + ".txt",
+						"UTF-8");
 				writer.print("P, C");
 				for (int i = 0; i < 14; i++) {
 					writer.print("\t" + cValues.get(i));
 				}
-				//p
+				// p
 				for (int i = 0; i < 14; i++) {
 					// each line
 					writer.println();
 					writer.print(pValues.get(i));
 					// print the error values now
-					//c
+					// c
 					for (int j = 0; j < 14; j++) {
 						if (values[i][j] == 0) {
 							writer.print("\t");
@@ -315,6 +316,6 @@ public class GridSearch {
 		svm_train.main(new String[] { "-q", "-c",
 				Double.toString(getC(counterC)), "-p",
 				Double.toString(getP(counterP)), "-s", "3", "-t", "0", "-v",
-				"5", "converted-selected-train" });
+				"5", Main.currentState + "train" });
 	}
 }
