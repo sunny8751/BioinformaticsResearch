@@ -17,6 +17,7 @@ public class Test1 {
 		String tf = "E2F1";
 		if (tf.equals("E2F1")) {
 			t.cutoff = .4; // - E2F1 GCGC
+			
 		} else {
 			t.cutoff = 0.135;// - E2F4 GCGC
 		}
