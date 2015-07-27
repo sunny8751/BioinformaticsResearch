@@ -1,11 +1,12 @@
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.StringTokenizer;
 
 public class Main {
@@ -27,7 +28,7 @@ public class Main {
 	private StringTokenizer st;
 	// size: number of lines in the file
 	private int size;
-	public static String core = "GCGC";
+	public static String core = "GCGG";
 	// cores: "GCGC" or "GCGG" or "CCGC"
 	private static double[] params;
 	// form of -c, -p
@@ -41,7 +42,7 @@ public class Main {
 
 	// converts file to supported format
 	public static void main(String[] args) throws IOException {
-		args = new String[] { "E2F1" };
+		//args = new String[] { "E2F4" };
 		Main m = new Main();
 		// in order to do all of them at once
 		/*
@@ -57,8 +58,8 @@ public class Main {
 				if (noTrain) {
 					finalModel = false;
 				}
-				train = "train" + i + args[0] + ".txt";
-				test = "test" + i + args[0] + ".txt";
+				train = "train_data" + i + "_" + args[0] + "_Feat13" + ".txt";
+				test = "test_data" + i + "_" + args[0] + "_Feat13" + ".txt";
 				// select the subgroup of sequences to analyze and reformat
 				m.select(train, true);
 				// do the same with the test file
@@ -172,6 +173,29 @@ public class Main {
 					// ok next dataset now
 				}
 			}
+			List<String> list = new ArrayList<String>();
+
+			BufferedReader br = new BufferedReader(new FileReader("data1_" + args[0] + "_Core" + core + "_Feat13.txt"));
+			int count = (int) br.lines().count();
+			br.close();
+			for (int i = 1; i <= 10; i++) {
+				br = new BufferedReader(new FileReader("data"
+						+ i + "_" + args[0] + "_Core" + core + "_Feat13.txt"));
+				for(int j = 0; j < count; j++) {
+					if(i == 1){
+						list.add(br.readLine());
+						continue;
+					}
+					String s = list.get(i);
+					list.set(i, s + "\t" + br.readLine());
+				}
+				br.close();
+			}
+			PrintWriter writer = new PrintWriter("bargraph.txt", "UTF-8");
+			for(int i = 0; i<list.size(); i++){
+				writer.println(list.get(i));
+			}
+			writer.close();
 		} else {
 			// if final model
 			// select and convert

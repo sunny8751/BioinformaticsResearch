@@ -2,7 +2,9 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.ObjectInputStream.GetField;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -13,24 +15,115 @@ public class Test1 {
 
 	public static void main(String[] args) throws IOException {
 		Test1 t = new Test1();
+		// t.start();
+		// t.interpretAverages();
+		// t.graphWeights();
+		
+//		int [] feats = new int[]{
+//		
+//		};
+//		for(int i = 0; i<feats.length; i++){
+//			System.out.println(t.getSeqPos(feats[i])[0]+"\t"+t.getSeqPos(feats[i])[1]);
+//		}
+	}
 
-		String tf = "E2F1";
-		if (tf.equals("E2F1")) {
-			t.cutoff = .4; // - E2F1 GCGC
-		} else {
-			t.cutoff = 0.135;// - E2F4 GCGC
+	void graphWeights() throws IOException {
+		// 3mer E2F1 feat weights vs 3mer E2F4 feat weights
+		// gets outliers from y=x graph and puts it in ascending order
+		BufferedReader br = new BufferedReader(new FileReader(
+				"averages_GCGG.txt"));
+		int size = (int) br.lines().count() - 1;
+		br.close();
+		br = new BufferedReader(new FileReader("averages_GCGG.txt"));
+		double[][] points = new double[2][size], sd = new double[2][size];
+		// set the points to an array
+		// indices of points where stand dev intersects y=x line
+		double[] distances = new double[size], orderedDistances = new double[size];
+		br.readLine();
+		for (int i = 0; i < size; i++) {
+			String line = br.readLine();
+			StringTokenizer st = new StringTokenizer(line);
+			// E2F1 average
+			points[0][i] = Double.parseDouble(st.nextToken());
+			// E2F1 sd
+			sd[0][i] = Double.parseDouble(st.nextToken());
+			// E2F4 average
+			points[1][i] = Double.parseDouble(st.nextToken());
+			// E2F4 sd
+			sd[1][i] = Double.parseDouble(st.nextToken());
+			// double x0 = points[0][i] - sd[0][i], x1 = points[0][i] +
+			// sd[0][i], y0 = points[1][i]
+			// - sd[1][i], y1 = points[1][i] + sd[1][i];
+			// if (testIntersect(x0, y1, x1, y1) || testIntersect(x1, y1, x1,
+			// y0)
+			// || testIntersect(x0, y0, x1, y0)
+			// || testIntersect(x0, y1, x0, y0)) {
+			// // collision
+			// indices.add(i);
+			// System.out.println(i);
+			// }
+			distances[i] = Math.abs(-points[0][i] + points[1][i])
+					/ Math.sqrt(2);
+			orderedDistances[i] = distances[i];
 		}
-		t.process(tf);
-		// split into 10 versions
-		 for (int i = 1; i <= 10; i++) {
-		 new ChangeData().run(Integer.toString(i), tf);
-		 }
+		br.close();
+		Arrays.sort(orderedDistances);
+		// List<Integer> list = new ArrayList<Integer>();
+		double cutoff = .06;
+		for (int i = size - 1; i >= 0; i--) {
+			if (orderedDistances[i] > cutoff) {
+				for (int j = 0; j < size; j++) {
+					if (distances[j] == orderedDistances[i]) {
+						// list.add(j);
+						System.out.println((j + 1) + "\t" + distances[j]);
+					}
+				}
+			}
+		}
+	}
+
+	boolean testIntersect(double l1x1, double l1y1, double l1x2, double l1y2) {
+		boolean result = false;
+		double l2x1 = l1x1, l2x2 = l1x1, l2y1 = l1x2, l2y2 = l1x2;
+		double s1_x = l1x2 - l1x1, s1_y = l1y2 - l1y1,
+
+		s2_x = l2x2 - l2x1, s2_y = l2y2 - l2y1,
+
+		s = (-s1_y * (l1x1 - l2x1) + s1_x * (l1y1 - l2y1))
+				/ (-s2_x * s1_y + s1_x * s2_y), t = (s2_x * (l1y1 - l2y1) - s2_y
+				* (l1x1 - l2x1))
+				/ (-s2_x * s1_y + s1_x * s2_y);
+
+		if (s >= 0 && s <= 1 && t >= 0 && t <= 1) {
+			// Collision detected
+			result = true;
+		}
+		return result;
+	}
+
+	void start() throws IOException {
+		String tf = "E2F4";
+		if (Main.core == "GCGC") {
+			if (tf.equals("E2F1")) {
+				cutoff = 0.4; // - E2F1 GCGC
+			} else {
+				cutoff = 0.3;// - E2F4 GCGC
+			}
+		} else {
+			// GCGG core
+			if (tf.equals("E2F1")) {
+				cutoff = 0.55; // - E2F1 GCGG
+			} else {
+				cutoff = 0.1;// - E2F4 GCGG
+			}
+		}
+		process(tf); // split into 10 versions
+		for (int i = 1; i <= 10; i++) {
+			new ChangeData().run(Integer.toString(i), tf);
+		}
 		// partition
 		// t.cutoff(tf);
-		 Main.main(new String[] { tf });
-
-		// t.interpretAverages();
-
+		Main.main(new String[] { tf });
 	}
 
 	List<String> revCompl(String tf, String _core) throws IOException {
@@ -113,23 +206,49 @@ public class Test1 {
 			System.out.print(i + "\t");
 		}
 		System.out.println();
+		// add every feat into list to sort and print
+		List<String> list = new ArrayList<String>();
 		// each feature
 		for (int i = 0; i < sigFeats.size(); i++) {
+			String s = "";
 			String seq = getSeqPos(sigFeats.get(i))[0];
 			int pos = Integer.parseInt(getSeqPos(sigFeats.get(i))[1]);
-			System.out.print("\t" + sigFeats.get(i) + "\t"
-					+ sigFeatValues.get(i) + "\t" + seq + "\t" + pos + "\t");
+			s = "\t" + sigFeats.get(i) + "\t" + sigFeatValues.get(i) + "\t"
+					+ seq + "\t" + pos + "\t";
 			// show the position here
 			// put appropriate number of spaces to get to the right pos
 			for (int j = 0; j < pos
 					- Integer.parseInt(getSeqPos(sigFeats.get(0))[1]); j++) {
-				System.out.print("\t");
+				s = s + "\t";
 			}
 			// iterate through each character and print it
 			for (int j = 0; j < seq.length(); j++) {
-				System.out.print(seq.substring(j, j + 1) + "\t");
+				s = s + seq.substring(j, j + 1) + "\t";
 			}
-			System.out.println();
+			list.add(s);
+		}
+		// sort
+		// create array of values
+		double[] weights = new double[list.size()];
+		for (int i = 0; i < list.size(); i++) {
+			StringTokenizer st = new StringTokenizer(list.get(i));
+			st.nextToken();
+			weights[i] = Double.parseDouble(st.nextToken());
+		}
+		Arrays.sort(weights);
+		List<String> sortedList = new ArrayList<String>();
+		for (int i = 0; i < weights.length; i++) {
+			for (int j = 0; j < list.size(); j++) {
+				StringTokenizer st = new StringTokenizer(list.get(j));
+				st.nextToken();
+				if (Double.parseDouble(st.nextToken()) == weights[i]) {
+					sortedList.add(list.get(j));
+					break;
+				}
+			}
+		}
+		for (int i = sortedList.size() - 1; i >= 0; i--) {
+			System.out.println(sortedList.get(i));
 		}
 		System.out.print("\tcutoff\t" + cutoff);
 		// ________________________________________________________________________________
@@ -137,13 +256,13 @@ public class Test1 {
 		System.out.println();
 		// feat 3
 		br = new BufferedReader(new FileReader(file));
-		count = (int) (br.lines().count() - 120);
+		count = (int) (br.lines().count());
 		br.close();
 		largest = 0;
 		br = new BufferedReader(new FileReader(file));
 		for (int i = 0; i < count; i++) {
 			line = br.readLine();
-			if (Math.abs(Double.parseDouble(line)) > largest) {
+			if (i >= 120 && Math.abs(Double.parseDouble(line)) > largest) {
 				largest = Math.abs(Double.parseDouble(line));
 			}
 		}
@@ -156,7 +275,7 @@ public class Test1 {
 		br = new BufferedReader(new FileReader(file));
 		for (int i = 0; i < count; i++) {
 			line = br.readLine();
-			if (Math.abs(Double.parseDouble(line)) > cutoff) {
+			if (i >= 120 && Math.abs(Double.parseDouble(line)) > cutoff) {
 				sigFeatValues.add(Double.parseDouble(line));
 				sigFeats.add(i + 1);
 			}
@@ -169,24 +288,51 @@ public class Test1 {
 			System.out.print(i + "\t");
 		}
 		System.out.println();
+		// add every feat into list to sort and print
+		list.clear();
 		// each feature
 		for (int i = 0; i < sigFeats.size(); i++) {
+			String s = "";
 			String seq = getSeqPos(sigFeats.get(i))[0];
 			int pos = Integer.parseInt(getSeqPos(sigFeats.get(i))[1]);
-			System.out.print((sigFeats.get(i) - 120) + "\t" + sigFeats.get(i)
-					+ "\t" + sigFeatValues.get(i) + "\t" + seq + "\t" + pos
-					+ "\t");
+			s = ((sigFeats.get(i) - 120) + "\t" + sigFeats.get(i) + "\t"
+					+ sigFeatValues.get(i) + "\t" + seq + "\t" + pos + "\t");
 			// show the position here
 			// put appropriate number of spaces to get to the right pos
 			for (int j = 0; j < pos
 					- Integer.parseInt(getSeqPos(sigFeats.get(0))[1]); j++) {
-				System.out.print("\t");
+				s = s + "\t";
 			}
 			// iterate through each character and print it
 			for (int j = 0; j < seq.length(); j++) {
-				System.out.print(seq.substring(j, j + 1) + "\t");
+				s = s + seq.substring(j, j + 1) + "\t";
 			}
-			System.out.println();
+			list.add(s);
+		}
+		// sort
+		// create array of values
+		weights = new double[list.size()];
+		for (int i = 0; i < list.size(); i++) {
+			StringTokenizer st = new StringTokenizer(list.get(i));
+			st.nextToken();
+			st.nextToken();
+			weights[i] = Double.parseDouble(st.nextToken());
+		}
+		Arrays.sort(weights);
+		sortedList.clear();
+		for (int i = 0; i < weights.length; i++) {
+			for (int j = 0; j < list.size(); j++) {
+				StringTokenizer st = new StringTokenizer(list.get(j));
+				st.nextToken();
+				st.nextToken();
+				if (Double.parseDouble(st.nextToken()) == weights[i]) {
+					sortedList.add(list.get(j));
+					break;
+				}
+			}
+		}
+		for (int i = sortedList.size() - 1; i >= 0; i--) {
+			System.out.println(sortedList.get(i));
 		}
 		System.out.print("\tcutoff\t" + cutoff);
 	}
@@ -254,6 +400,7 @@ public class Test1 {
 			Main.core = "CCGC";
 			Main.mers = 36;
 			List<String> list = revCompl(tf, "CCGC");
+			Main.core = "GCGG";
 			Main.mers = 34;
 			for (int i = 0; i < list.size(); i++) {
 				String s = processLine(list.get(i));
@@ -264,7 +411,8 @@ public class Test1 {
 		}
 		writer.close();
 		data.close();
-		//get rid of the duplicate sequences and take the median of the intensity scores
+		// get rid of the duplicate sequences and take the median of the
+		// intensity scores
 		selectDiffSeq("processed" + tf + ".txt");
 	}
 
@@ -329,7 +477,7 @@ public class Test1 {
 			StringTokenizer st = new StringTokenizer(line);
 			st.nextToken();
 			if (sameSeq.indexOf(st.nextToken()) == -1) {
-				//non duplicates
+				// non duplicates
 				list.add(line);
 			}
 			line = br.readLine();
@@ -379,7 +527,6 @@ public class Test1 {
 		}
 		return "";
 	}
-	
 
 	void compare() throws IOException {
 

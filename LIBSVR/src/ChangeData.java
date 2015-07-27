@@ -30,9 +30,9 @@ public class ChangeData {
 		Collections.shuffle(newAllData);
 		allData.close();
 		// partition
-		PrintWriter trainWriter = new PrintWriter("train" + num + tf + ".txt",
+		PrintWriter trainWriter = new PrintWriter("train_data" + num +"_"+ tf+"_Feat13"+ ".txt",
 				"UTF-8");
-		PrintWriter testWriter = new PrintWriter("test" + num + tf + ".txt",
+		PrintWriter testWriter = new PrintWriter("test_data" + num +"_"+ tf+"_Feat13"+ ".txt",
 				"UTF-8");
 		double percent = .80;// percent of total data that is train set
 		int trainSize = 0;
