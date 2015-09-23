@@ -19,7 +19,7 @@ public class analyzeModel {
 		//get the feature seq and pos of feature # from the file featureMeaning.txt
 		BufferedReader br = new BufferedReader(new FileReader(
 				"featureMeaning.txt"));
-		int count = (int) br.lines().count();
+		int count = Main.countLines(br);
 		for (int i = 0; i < features.length; i++) {
 			br = new BufferedReader(new FileReader("featureMeaning.txt"));
 			br.readLine();

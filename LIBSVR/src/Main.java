@@ -38,11 +38,11 @@ public class Main {
 	// changes from "", selected-, converted-selected-
 	public static String currentState = "";
 
-	public static int iteration;
+	public static int iteration, times = 1;
 
 	// converts file to supported format
 	public static void main(String[] args) throws IOException {
-		//args = new String[] { "E2F4" };
+		//args = new String[] { "Intersection" };
 		Main m = new Main();
 		// in order to do all of them at once
 		/*
@@ -50,7 +50,7 @@ public class Main {
 		 * }
 		 */
 		if (!finalModel) {
-			for (int i = 1; i <= 10; i++) {
+			for (int i = 1; i <= times; i++) {
 				iteration = i;
 				if (!finalModel) {
 					GridSearch.Start();
@@ -176,9 +176,9 @@ public class Main {
 			List<String> list = new ArrayList<String>();
 
 			BufferedReader br = new BufferedReader(new FileReader("data1_" + args[0] + "_Core" + core + "_Feat13.txt"));
-			int count = (int) br.lines().count();
+			int count = Main.countLines(bf);
 			br.close();
-			for (int i = 1; i <= 10; i++) {
+			for (int i = 1; i <= times; i++) {
 				br = new BufferedReader(new FileReader("data"
 						+ i + "_" + args[0] + "_Core" + core + "_Feat13.txt"));
 				for(int j = 0; j < count; j++) {

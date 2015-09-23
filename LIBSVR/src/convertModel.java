@@ -7,10 +7,11 @@ import java.util.StringTokenizer;
 public class convertModel {
 
 	public static void main(String[] args) throws IOException {
-		for (int i = 1; i <= 9; i++) {
+//		for (int i = 1; i <= 9; i++) {
 			// convert("data" + i + "_E2F1_CoreGCGC_Feat13");
-			convert("data"+i+"_E2F4_CoreGCGC_Feat13");
-		}
+//			convert("data"+i+"_E2F4_CoreGCGC_Feat13");
+//		}
+		convert("joshModel");
 	}
 
 	public static void convert(String file) throws IOException {

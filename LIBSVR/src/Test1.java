@@ -15,94 +15,19 @@ public class Test1 {
 
 	public static void main(String[] args) throws IOException {
 		Test1 t = new Test1();
-		// t.start();
+//		for (int i = 0; i < 3; i++) {
+//			t.cutoff = .05+i*.02;
+//			t.start();
+//		}
+		t.start();
 		// t.interpretAverages();
 		// t.graphWeights();
-		
-//		int [] feats = new int[]{
-//		
-//		};
-//		for(int i = 0; i<feats.length; i++){
-//			System.out.println(t.getSeqPos(feats[i])[0]+"\t"+t.getSeqPos(feats[i])[1]);
-//		}
-	}
 
-	void graphWeights() throws IOException {
-		// 3mer E2F1 feat weights vs 3mer E2F4 feat weights
-		// gets outliers from y=x graph and puts it in ascending order
-		BufferedReader br = new BufferedReader(new FileReader(
-				"averages_GCGG.txt"));
-		int size = (int) br.lines().count() - 1;
-		br.close();
-		br = new BufferedReader(new FileReader("averages_GCGG.txt"));
-		double[][] points = new double[2][size], sd = new double[2][size];
-		// set the points to an array
-		// indices of points where stand dev intersects y=x line
-		double[] distances = new double[size], orderedDistances = new double[size];
-		br.readLine();
-		for (int i = 0; i < size; i++) {
-			String line = br.readLine();
-			StringTokenizer st = new StringTokenizer(line);
-			// E2F1 average
-			points[0][i] = Double.parseDouble(st.nextToken());
-			// E2F1 sd
-			sd[0][i] = Double.parseDouble(st.nextToken());
-			// E2F4 average
-			points[1][i] = Double.parseDouble(st.nextToken());
-			// E2F4 sd
-			sd[1][i] = Double.parseDouble(st.nextToken());
-			// double x0 = points[0][i] - sd[0][i], x1 = points[0][i] +
-			// sd[0][i], y0 = points[1][i]
-			// - sd[1][i], y1 = points[1][i] + sd[1][i];
-			// if (testIntersect(x0, y1, x1, y1) || testIntersect(x1, y1, x1,
-			// y0)
-			// || testIntersect(x0, y0, x1, y0)
-			// || testIntersect(x0, y1, x0, y0)) {
-			// // collision
-			// indices.add(i);
-			// System.out.println(i);
-			// }
-			distances[i] = Math.abs(-points[0][i] + points[1][i])
-					/ Math.sqrt(2);
-			orderedDistances[i] = distances[i];
-		}
-		br.close();
-		Arrays.sort(orderedDistances);
-		// List<Integer> list = new ArrayList<Integer>();
-		double cutoff = .06;
-		for (int i = size - 1; i >= 0; i--) {
-			if (orderedDistances[i] > cutoff) {
-				for (int j = 0; j < size; j++) {
-					if (distances[j] == orderedDistances[i]) {
-						// list.add(j);
-						System.out.println((j + 1) + "\t" + distances[j]);
-					}
-				}
-			}
-		}
-	}
-
-	boolean testIntersect(double l1x1, double l1y1, double l1x2, double l1y2) {
-		boolean result = false;
-		double l2x1 = l1x1, l2x2 = l1x1, l2y1 = l1x2, l2y2 = l1x2;
-		double s1_x = l1x2 - l1x1, s1_y = l1y2 - l1y1,
-
-		s2_x = l2x2 - l2x1, s2_y = l2y2 - l2y1,
-
-		s = (-s1_y * (l1x1 - l2x1) + s1_x * (l1y1 - l2y1))
-				/ (-s2_x * s1_y + s1_x * s2_y), t = (s2_x * (l1y1 - l2y1) - s2_y
-				* (l1x1 - l2x1))
-				/ (-s2_x * s1_y + s1_x * s2_y);
-
-		if (s >= 0 && s <= 1 && t >= 0 && t <= 1) {
-			// Collision detected
-			result = true;
-		}
-		return result;
 	}
 
 	void start() throws IOException {
-		String tf = "E2F4";
+		String tf = "E2F1";
+		Main.core = "GCGC";
 		if (Main.core == "GCGC") {
 			if (tf.equals("E2F1")) {
 				cutoff = 0.4; // - E2F1 GCGC
@@ -118,12 +43,12 @@ public class Test1 {
 			}
 		}
 		process(tf); // split into 10 versions
-		for (int i = 1; i <= 10; i++) {
+		for (int i = 1; i <= 1; i++) {
 			new ChangeData().run(Integer.toString(i), tf);
 		}
 		// partition
 		// t.cutoff(tf);
-		Main.main(new String[] { tf });
+		//Main.main(new String[] { tf });
 	}
 
 	List<String> revCompl(String tf, String _core) throws IOException {
@@ -256,7 +181,7 @@ public class Test1 {
 		System.out.println();
 		// feat 3
 		br = new BufferedReader(new FileReader(file));
-		count = (int) (br.lines().count());
+		count = Main.countLines(br);
 		br.close();
 		largest = 0;
 		br = new BufferedReader(new FileReader(file));
@@ -337,12 +262,12 @@ public class Test1 {
 		System.out.print("\tcutoff\t" + cutoff);
 	}
 
-	private String[] getSeqPos(int feat) throws IOException {
+	String[] getSeqPos(int feat) throws IOException {
 		// returns 0-seq, 1-pos
 		String[] re = new String[2];
 		BufferedReader br = new BufferedReader(new FileReader(
 				"featureMeaning.txt"));
-		int count = (int) br.lines().count();
+		int count = Main.countLines(br);
 		br.close();
 		br = new BufferedReader(new FileReader("featureMeaning.txt"));
 		br.readLine();
@@ -364,7 +289,7 @@ public class Test1 {
 				+ tf + ".txt"));
 		PrintWriter writer = new PrintWriter("train" + tf + ".txt", "UTF-8");
 		data.readLine();
-		int count = (int) data.lines().count();
+		int count = Main.countLines(data);
 		data.close();
 		data = new BufferedReader(new FileReader("processed" + tf + ".txt"));
 		for (int i = 0; i < (int) (.8d * count); i++) {
