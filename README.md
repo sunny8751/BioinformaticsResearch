@@ -8,6 +8,7 @@ The "Raw Data" folder contains the original gcPBM raw data that I worked with. T
 The "src" folder contains the Java files that I modified from the original LIBSVM.
 
 By analyzing and comparing the data, I produced the following images. A complete set of the images is available in the "Images" folder.
+![Alt text](/Images/graph_weights_GCGC_normalized.jpeg?raw=true)
 ![Alt text](/Images/2.png?raw=true)
 ![Alt text](/Images/3AB.png?raw=true)
 ![Alt text](/Images/3CD.png?raw=true)
@@ -15,4 +16,3 @@ By analyzing and comparing the data, I produced the following images. A complete
 ![Alt text](/Images/5.png?raw=true)
 ![Alt text](/Images/6.png?raw=true)
 ![Alt text](/Images/7.png?raw=true)
-![Alt text](/Images/graph_weights_GCGC_normalized.jpeg?raw=true)
