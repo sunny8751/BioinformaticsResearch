@@ -1,0 +1,9 @@
+n = # of features
+Ranking: 
+1. ranked every feature weight from 1-n with 1 being the highest weight.
+2. took out not significant features by filtering out all features with weights less than cutoff.
+3. weight cutoff determined by plotting each weight in density graph with feature weights on one side and frequency on other side.
+Took mean (around 0 theoretically) and std dev. So, filter out features with weights of mean +- sd on both sides
+4. Found absolute value of difference of both weights of same feature and put in descending order
+5. Plot on scatter plot with both feature weights on axes
+
