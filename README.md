@@ -9,6 +9,10 @@ The "src" folder contains the Java files that I modified from the original LIBSV
 
 By analyzing and comparing the data, I produced the following images. A complete set of the images is available in the "Images" folder.
 
+My research poster summarizing my project (Presented at SNCURCS- State of North Carolina Undergraduate Research & Creativity Symposium):
+![Alt text](/Images/graph_weights_GCGC_normalized.jpeg?raw=true)
+
+Other images from the analysis:
 ![Alt text](/Images/graph_weights_GCGC_normalized.jpeg?raw=true)
 ![Alt text](/Images/2.png?raw=true)
 ![Alt text](/Images/3AB.png?raw=true)
