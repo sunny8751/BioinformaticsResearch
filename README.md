@@ -1,4 +1,6 @@
 # Bioinformatics Research
+*Summary*
+
 Bioinformatics research project at Duke University's Center for Genomic and Computational Biology in the Gordan Lab (http://gordanlab.cs.duke.edu). Uses machine learning (support vector regression) to analyze transcription factor binding to DNA sequences.
 
 Used the LIBSVM project (https://www.csie.ntu.edu.tw/~cjlin/libsvm/) and edited the program to use for my research at Duke University on the comparison of transcription factors E2F1 and E2F4's binding to DNA sequences. This program creates models that predict the likelihood of E2F1 and E2F4 binding to the inputted DNA sequence, and then analyzes the models' features to find differences in the binding specificities of the two DNA sequences.
@@ -12,9 +14,11 @@ The "src" folder contains the Java files that I modified from the original LIBSV
 By analyzing and comparing the data, I produced the following images. A complete set of the images is available in the "Images" folder.
 
 My research poster summarizing my project (Presented at SNCURCS- State of North Carolina Undergraduate Research & Creativity Symposium):
+
 ![Alt text](/Images/Research_Poster.jpg?raw=true)
 
 Other images from the analysis:
+
 ![Alt text](/Images/graph_weights_GCGC_normalized.jpeg?raw=true)
 ![Alt text](/Images/2.png?raw=true)
 ![Alt text](/Images/3AB.png?raw=true)
